@@ -1,4 +1,5 @@
 ﻿using Comandas.Api.Database;
+using Comandas.Api.DTOs.Mesa;
 using Comandas.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -24,23 +25,33 @@ public class MesasController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Mesa>> GetMesa(int id)
+    public async Task<ActionResult<MesaByIdDto>> GetMesa(int id)
     {
         var mesa = await _dbContext.Mesas.FindAsync(id);
         if (mesa == null)
         {
             return NotFound();
         }
-        return mesa;
+
+        var mesaById = new MesaByIdDto(mesa.Numero, mesa.SituacaoMesa);
+
+        return mesaById;
     }
 
     [HttpPost]
-    public async Task<ActionResult<Mesa>> PostMesa(Mesa mesa)
+    public async Task<ActionResult<MesaCreateDto>> PostMesa(MesaCreateDto mesaDto)
     {
+        var mesa = new Mesa
+        {
+            Numero = mesaDto.numero
+        };
+
         _dbContext.Mesas.Add(mesa);
         await _dbContext.SaveChangesAsync();
 
-        return CreatedAtAction("GetMesa", new { id = mesa.Id }, mesa);
+        var mesaCreateDto = new MesaCreateDto(mesa.Numero);
+
+        return CreatedAtAction("GetMesa", new { id = mesa.Id }, mesaCreateDto);
     }
 
 }

@@ -73,4 +73,6 @@ public class ComandasDbContext : DbContext
 
     public DbSet<PedidoCozinhaItem> PedidoCozinhaItens { get; set; }
 
+    public DbSet<Usuario> Usuarios { get; set; }
+
 }

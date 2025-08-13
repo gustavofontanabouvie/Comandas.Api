@@ -40,7 +40,6 @@ public class ComandasController : ControllerBase
         return respostaDto;
     }
 
-
     [HttpPost]
     public async Task<ActionResult<ComandaCreateResponseDto>> PostComanda(ComandaCreateDto comandaDto)
     {
@@ -103,8 +102,6 @@ public class ComandasController : ControllerBase
 
         return Ok(updateResponse);
     }
-
-
 
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteComanda(int id)
