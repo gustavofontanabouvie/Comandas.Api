@@ -47,7 +47,7 @@ public class ComandasController : ControllerBase
         {
             NumeroMesa = comandaDto.NumeroMesa,
             NomeCliente = comandaDto.NomeCliente,
-
+            SituacaoComanda = true
         };
 
         _dbContext.Comandas.Add(comanda);
@@ -61,7 +61,28 @@ public class ComandasController : ControllerBase
             };
 
             _dbContext.ComandaItens.Add(comandaItem);
+
+            var cardapioItem = await _dbContext.CardapioItens.FindAsync(item);
+
+            if (cardapioItem != null && cardapioItem.PossuiPreparo)
+            {
+                PedidoCozinha pedidoCozinha = new()
+                {
+                    Comanda = comanda,
+                    Situacao = 1,
+                    PedidoCozinhaItens = new List<PedidoCozinhaItem>()
+                    {
+                       new PedidoCozinhaItem()
+                       {
+                           ComandaItem = comandaItem
+                       }
+                    }
+                };
+
+                await _dbContext.PedidosCozinha.AddAsync(pedidoCozinha);
+            }
         }
+
 
         await _dbContext.SaveChangesAsync();
 
@@ -94,6 +115,26 @@ public class ComandasController : ControllerBase
             };
 
             _dbContext.ComandaItens.Add(comandaItem);
+
+            var cardapioItem = await _dbContext.CardapioItens.FindAsync(item);
+
+            if (cardapioItem != null && cardapioItem.PossuiPreparo)
+            {
+                PedidoCozinha pedidoCozinha = new()
+                {
+                    Comanda = comanda,
+                    Situacao = 1,
+                    PedidoCozinhaItens = new List<PedidoCozinhaItem>()
+                    {
+                       new PedidoCozinhaItem()
+                       {
+                           ComandaItem = comandaItem
+                       }
+                    }
+                };
+
+                await _dbContext.PedidosCozinha.AddAsync(pedidoCozinha);
+            }
         }
 
         await _dbContext.SaveChangesAsync();

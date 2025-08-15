@@ -35,4 +35,5 @@ public class PedidosCozinhaController : ControllerBase
         var pedidoResponse = new PedidoRespondeDto(pedidoCozinha.ComandaId, pedidoCozinha.Situacao);
         return pedidoResponse;
     }
+
 }

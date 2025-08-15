@@ -37,4 +37,40 @@ public class PedidoCozinhaItensController : ControllerBase
         return responseDto;
     }
 
+
+    [HttpGet("pendentes/{situacao}")]
+    public async Task<ActionResult<List<PedidoResponsePendentesDto>>> GetPedidosPendentes(int situacao)
+    {
+        var pedidosPendentes = await (from pedidoCozinhaItem in _dbContext.PedidoCozinhaItens
+                                      join pedidoCozinha in _dbContext.PedidosCozinha
+                                        on pedidoCozinhaItem.PedidoCozinhaId equals pedidoCozinha.Id
+                                      join comanda in _dbContext.Comandas
+                                        on pedidoCozinha.ComandaId equals comanda.Id
+                                      join comandaItem in _dbContext.ComandaItens
+                                        on comanda.Id equals comandaItem.ComandaId
+                                      join cardapioItem in _dbContext.CardapioItens
+                                        on comandaItem.CardapioItemId equals cardapioItem.Id
+                                      where pedidoCozinha.Situacao == situacao
+                                      && comanda.SituacaoComanda
+                                      && pedidoCozinhaItem.ComandaItemId == comandaItem.Id
+                                      select new
+                                      {
+                                          comanda.NumeroMesa,
+                                          comanda.NomeCliente,
+                                          cardapioItem.Titulo,
+                                          pedidoCozinha.Id
+                                      }
+                                      ).ToListAsync();
+
+        List<PedidoResponsePendentesDto> listaDto = new();
+
+        foreach (var pedido in pedidosPendentes)
+        {
+            var pedidoResponseDto = new PedidoResponsePendentesDto(pedido.NumeroMesa, pedido.NomeCliente, pedido.Titulo);
+            listaDto.Add(pedidoResponseDto);
+        }
+
+        return listaDto;
+    }
+
 }
