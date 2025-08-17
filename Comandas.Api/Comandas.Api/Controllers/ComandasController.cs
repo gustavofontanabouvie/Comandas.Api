@@ -20,12 +20,25 @@ public class ComandasController : ControllerBase
         _dbContext = context;
     }
 
+
+    /// <summary>
+    /// Retorna a lista de todas as comandas
+    /// </summary>
+    /// <returns>ActionResult</returns>
+    /// <response code="200">Retorna a lista de comandas</response>
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Comanda>>> GetComandas()
     {
         return await _dbContext.Comandas.ToListAsync();
     }
 
+    /// <summary>
+    /// Busca uma comanda pelo seu ID no banco de dados
+    /// </summary>
+    /// <param name="id">O ID da comanda que deseja buscar</param>
+    /// <returns>ActionResult</returns>
+    /// <response code="200">Comanda encontrada com sucesso</response>
+    /// <response code="404">Id não encontrado</response>
     [HttpGet("{id}")]
     public async Task<ActionResult<ComandaByIdDto>> GetComanda(int id)
     {
@@ -37,9 +50,15 @@ public class ComandasController : ControllerBase
         }
 
         var respostaDto = new ComandaByIdDto(comanda.NumeroMesa, comanda.NomeCliente, comanda.SituacaoComanda);
-        return respostaDto;
+        return Ok(respostaDto);
     }
 
+    /// <summary>
+    /// Adiciona uma comanda ao banco de dados
+    /// </summary>
+    /// <param name="comandaDto">Objeto com os campos necessários para criar uma comanda</param>
+    /// <returns>ActionResult</returns>
+    /// <response code="201">Comanda cadastrada com sucesso</response>
     [HttpPost]
     public async Task<ActionResult<ComandaCreateResponseDto>> PostComanda(ComandaCreateDto comandaDto)
     {
@@ -91,6 +110,15 @@ public class ComandasController : ControllerBase
         return CreatedAtAction("GetComanda", new { id = comanda.Id }, comandaResponse);
     }
 
+
+    /// <summary>
+    /// Edita uma comanda pelo Id
+    /// </summary>
+    /// <param name="id">ID da comanda resgatado no banco de dados</param>
+    /// <param name="updateDto">Objeto com os campos editados</param>
+    /// <returns>ActionResult</returns>
+    /// <response code="200">Edição feita com sucesso</response>
+    /// <response code="404">ID não encontrado</response>
     [HttpPut("{id}")]
     public async Task<ActionResult<ComandaUpdateResponseDto>> PutComanda(int id, ComandaUpdateDto updateDto)
     {
@@ -144,6 +172,13 @@ public class ComandasController : ControllerBase
         return Ok(updateResponse);
     }
 
+    /// <summary>
+    /// Deleta uma comanda pelo ID
+    /// </summary>
+    /// <param name="id">ID da comanda a ser deletada</param>
+    /// <returns>ActionResult</returns>
+    /// <response code="200">Comanda deletada com sucesso</response>
+    /// <response code="404">ID não encontrada</response>
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteComanda(int id)
     {

@@ -36,4 +36,61 @@ public class PedidosCozinhaController : ControllerBase
         return pedidoResponse;
     }
 
+
+    [HttpPatch("AvancarPedido/")]
+    public async Task<ActionResult> AvançarPedido(int pedidoCozinhaId)
+    {
+        var pedidoCozinha = await _dbContext.PedidosCozinha.FindAsync(pedidoCozinhaId);
+
+        if (pedidoCozinha == null)
+            return NotFound();
+
+        if (pedidoCozinha.Situacao == 1)
+        {
+            pedidoCozinha.Situacao = 2;
+        }
+        else if (pedidoCozinha.Situacao == 2)
+        {
+            pedidoCozinha.Situacao = 3;
+        }
+        else
+        {
+            pedidoCozinha.Situacao = 4;
+        }
+
+        _dbContext.PedidosCozinha.Update(pedidoCozinha);
+
+        await _dbContext.SaveChangesAsync();
+
+        return Ok(pedidoCozinha);
+    }
+
+    [HttpPatch("RetornarPedido/")]
+    public async Task<ActionResult> RetornarPedido(int pedidoCozinhaId)
+    {
+        var pedidoCozinha = await _dbContext.PedidosCozinha.FindAsync(pedidoCozinhaId);
+
+        if (pedidoCozinha == null)
+            return NotFound();
+
+        if (pedidoCozinha.Situacao == 2)
+        {
+            pedidoCozinha.Situacao = 1;
+        }
+        else if (pedidoCozinha.Situacao == 3)
+        {
+            pedidoCozinha.Situacao = 2;
+        }
+        else
+        {
+            return Ok(pedidoCozinha);
+        }
+
+        _dbContext.PedidosCozinha.Update(pedidoCozinha);
+
+        await _dbContext.SaveChangesAsync();
+
+        return Ok(pedidoCozinha);
+    }
+
 }
