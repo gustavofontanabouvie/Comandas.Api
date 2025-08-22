@@ -4,6 +4,7 @@ using Comandas.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Swashbuckle.AspNetCore.Annotations;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Comandas.Api.Controllers;
@@ -21,44 +22,46 @@ public class ComandasController : ControllerBase
     }
 
 
-    /// <summary>
-    /// Retorna a lista de todas as comandas
-    /// </summary>
-    /// <returns>ActionResult</returns>
-    /// <response code="200">Retorna a lista de comandas</response>
+    [SwaggerOperation(summary: "Retorno de uma lista com todas as Comandas cadastradas")]
+    [SwaggerResponse(200, "Retorna a lista das Comandas")]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Comanda>>> GetComandas()
     {
         return await _dbContext.Comandas.ToListAsync();
     }
 
-    /// <summary>
-    /// Busca uma comanda pelo seu ID no banco de dados
-    /// </summary>
-    /// <param name="id">O ID da comanda que deseja buscar</param>
-    /// <returns>ActionResult</returns>
-    /// <response code="200">Comanda encontrada com sucesso</response>
-    /// <response code="404">Id não encontrado</response>
+    [SwaggerOperation(summary: "Retorna uma Comanda", description: "Retorno de uma comanda pelo seu ID no banco de dados, retorna também os seus CardápioItens")]
+    [SwaggerResponse(404, "Comanda não encontrada")]
+    [SwaggerResponse(200, "Comanda encontrada com sucesso")]
     [HttpGet("{id}")]
     public async Task<ActionResult<ComandaByIdDto>> GetComanda(int id)
     {
-        var comanda = await _dbContext.Comandas.FindAsync(id);
+        var comanda = await _dbContext.Comandas.AsNoTracking()
+            .Where(c => c.Id == id)
+            .Select(c => new ComandaDto(c.NumeroMesa, c.NomeCliente, c.SituacaoComanda))
+            .TagWith(nameof(GetComanda))
+            .FirstOrDefaultAsync()
+            ;
 
         if (comanda == null)
         {
             return NotFound();
         }
 
-        var respostaDto = new ComandaByIdDto(comanda.NumeroMesa, comanda.NomeCliente, comanda.SituacaoComanda);
+        var comandaItens = await _dbContext.ComandaItens.AsNoTracking()
+                .Where(ci => ci.ComandaId == id)
+                .Select(ci => new ComandaItemByIdDto(ci.Id, ci.CardapioItemId, ci.CardapioItem.Titulo))
+                .TagWith(nameof(GetComanda) + "Itens")
+                .ToListAsync()
+                ;
+
+        var respostaDto = new ComandaByIdDto(comanda.numeroMesa, comanda.nomeCliente, comanda.situacaoComanda, comandaItens);
         return Ok(respostaDto);
     }
 
-    /// <summary>
-    /// Adiciona uma comanda ao banco de dados
-    /// </summary>
-    /// <param name="comandaDto">Objeto com os campos necessários para criar uma comanda</param>
-    /// <returns>ActionResult</returns>
-    /// <response code="201">Comanda cadastrada com sucesso</response>
+
+    [SwaggerOperation(summary: "Adiciona uma comanda ao banco de dados")]
+    [SwaggerResponse(201, "Comanda cadastrada com sucesso")]
     [HttpPost]
     public async Task<ActionResult<ComandaCreateResponseDto>> PostComanda(ComandaCreateDto comandaDto)
     {
@@ -69,7 +72,7 @@ public class ComandasController : ControllerBase
             SituacaoComanda = true
         };
 
-        _dbContext.Comandas.Add(comanda);
+        await _dbContext.Comandas.AddAsync(comanda);
 
         foreach (int item in comandaDto.CardapioItens)
         {
@@ -79,7 +82,7 @@ public class ComandasController : ControllerBase
                 Comanda = comanda
             };
 
-            _dbContext.ComandaItens.Add(comandaItem);
+            await _dbContext.ComandaItens.AddAsync(comandaItem);
 
             var cardapioItem = await _dbContext.CardapioItens.FindAsync(item);
 
@@ -111,25 +114,24 @@ public class ComandasController : ControllerBase
     }
 
 
-    /// <summary>
-    /// Edita uma comanda pelo Id
-    /// </summary>
-    /// <param name="id">ID da comanda resgatado no banco de dados</param>
-    /// <param name="updateDto">Objeto com os campos editados</param>
-    /// <returns>ActionResult</returns>
-    /// <response code="200">Edição feita com sucesso</response>
-    /// <response code="404">ID não encontrado</response>
+    [SwaggerOperation(summary: "Edita uma Comanda", description: "Verifica se os dados a editar são iguais e edita uma Comanda no banco de dados")]
+    [SwaggerResponse(201, "Comanda editada com sucesso")]
+    [SwaggerResponse(404, "Comanda não encontrada")]
     [HttpPut("{id}")]
     public async Task<ActionResult<ComandaUpdateResponseDto>> PutComanda(int id, ComandaUpdateDto updateDto)
     {
-        var comanda = await _dbContext.Comandas.FindAsync(id);
+        var comanda = await _dbContext.Comandas.AsNoTracking()
+            .Where(c => c.Id == id)
+            .FirstOrDefaultAsync();
 
         if (comanda == null)
             return NotFound();
 
+        if (!updateDto.nomeCliente.Equals(comanda.NomeCliente))
+            comanda.NomeCliente = updateDto.nomeCliente;
 
-        comanda.NomeCliente = updateDto.nomeCliente;
-        comanda.NumeroMesa = updateDto.numeroMesa;
+        if (updateDto.numeroMesa != comanda.NumeroMesa)
+            comanda.NumeroMesa = updateDto.numeroMesa;
 
 
         _dbContext.Comandas.Update(comanda);
@@ -142,9 +144,11 @@ public class ComandasController : ControllerBase
                 Comanda = comanda
             };
 
-            _dbContext.ComandaItens.Add(comandaItem);
+            await _dbContext.ComandaItens.AddAsync(comandaItem);
 
-            var cardapioItem = await _dbContext.CardapioItens.FindAsync(item);
+            var cardapioItem = await _dbContext.CardapioItens
+                .Where(ci => ci.Id == item)
+                .FirstOrDefaultAsync();
 
             if (cardapioItem != null && cardapioItem.PossuiPreparo)
             {
@@ -172,17 +176,16 @@ public class ComandasController : ControllerBase
         return Ok(updateResponse);
     }
 
-    /// <summary>
-    /// Deleta uma comanda pelo ID
-    /// </summary>
-    /// <param name="id">ID da comanda a ser deletada</param>
-    /// <returns>ActionResult</returns>
-    /// <response code="200">Comanda deletada com sucesso</response>
-    /// <response code="404">ID não encontrada</response>
+
+    [SwaggerOperation(summary: "Deleta uma comanda", description: "Deleta uma comanda baseada no ID")]
+    [SwaggerResponse(204, "Comanda deletada com sucesso")]
+    [SwaggerResponse(404, "Comanda não encontrada")]
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteComanda(int id)
     {
-        var comanda = await _dbContext.Comandas.FindAsync(id);
+        var comanda = await _dbContext.Comandas.AsNoTracking()
+            .Where(c => c.Id == id)
+            .FirstOrDefaultAsync();
 
         if (comanda == null)
             return NotFound();

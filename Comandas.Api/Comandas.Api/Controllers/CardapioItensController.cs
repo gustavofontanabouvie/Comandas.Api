@@ -3,6 +3,7 @@ using Comandas.Api.DTOs.CardapioItem;
 using Comandas.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Swashbuckle.AspNetCore.Annotations;
 
 
 namespace Comandas.Api.Controllers
@@ -18,12 +19,9 @@ namespace Comandas.Api.Controllers
             _dbContext = dbContext;
         }
 
-        /// <summary>
-        /// Criação de um novo CardapioItem
-        /// </summary>
-        /// <param name="cardapioItemCreateDto">Itens necessarios para criar um CardapioItem</param>
-        /// <returns>ActionResult</returns>
-        /// <response code="201">Caso o item seja criado com sucesso</response>
+
+        [SwaggerOperation(summary: "Criação de um novo CardapioItem")]
+        [SwaggerResponse(201, "Caso o item seja criado com sucesso")]
         [HttpPost]
         public async Task<ActionResult<CardapioItemCreateResponseDto>> PostCardapioItem(CardapioItemCreateDto cardapioItemCreateDto)
         {
@@ -43,76 +41,77 @@ namespace Comandas.Api.Controllers
             return CreatedAtAction("GetCardapioItem", new { id = cardapioItem.Id }, responseDto);
         }
 
-        /// <summary>
-        /// Retorno de uma lista com todos os cardapioItens cadastrados
-        /// </summary>
-        /// <returns>ActionResult</returns>
-        /// <response code="200">Retorna a lista dos cardapioItens</response>
+
+        [SwaggerOperation(summary: "Retorno de uma lista com todos os cardapioItens cadastrados")]
+        [SwaggerResponse(200, "Retorna a lista dos CardapioItens")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CardapioItem>>> GetCardapioItens()
         {
             return await _dbContext.CardapioItens.ToListAsync();
         }
 
-        /// <summary>
-        /// Retorna um cardapioItem pelo seu ID
-        /// </summary>
-        /// <param name="id">Id do cardapioItem a ser buscado</param>
-        /// <returns>ActionResult</returns>
-        /// <response code="404">CardapioItem não encontrado</response>
-        /// <response code="200">CardapioItem encontrado com sucesso</response>
+
+        [SwaggerOperation(summary: "Retorna um cardapioItem", description: "Retorna um cardápioItem baseado em um ID")]
+        [SwaggerResponse(404, "CardapioItem não encontrado")]
+        [SwaggerResponse(200, "CardapioItem encontrado com sucesso")]
         [HttpGet("{id}")]
         public async Task<ActionResult<CardapioItemByIdDto>> GetCardapioItem(int id)
         {
-            var cardapioItem = await _dbContext.CardapioItens.FindAsync(id);
+            var cardapioItem = await _dbContext.CardapioItens.AsNoTracking()
+                .Where(ci => ci.Id == id)
+                .Select(ci => new CardapioItemByIdDto(ci.Titulo, ci.Descricao, ci.Preco))
+                .TagWith(nameof(GetCardapioItem))
+                .FirstOrDefaultAsync();
 
             if (cardapioItem == null)
                 return NotFound();
 
-            var itemByIdDto = new CardapioItemByIdDto(cardapioItem.Titulo, cardapioItem.Descricao, cardapioItem.Preco);
-
-            return Ok(itemByIdDto);
+            return Ok(cardapioItem);
         }
 
-        /// <summary>
-        /// Edita um CardapioItem pelo seu ID
-        /// </summary>
-        /// <param name="id">Id que sera buscado no banco</param>
-        /// <param name="updateDto">Parametros necessários para editar um cardapioItem</param>
-        /// <returns>ActionResult</returns>
-        /// <response code="200">CardapioItem editado com sucesso</response>
-        /// <response code="404">ID não encontrado</response>
+        [SwaggerOperation(summary: "Edita um CardapioItem", description: "Verifica se os campos a editar são iguais e edita um CardapioItem pelo ID")]
+        [SwaggerResponse(404, "Item não encontrado")]
+        [SwaggerResponse(200, "Item editado com sucesso")]
         [HttpPut("{id}")]
-        public async Task<ActionResult> UpdateCardapioItem(int id, CardapioItemUpdateDto updateDto)
+        public async Task<ActionResult<CardapioItemUpdateResponseDto>> UpdateCardapioItem(int id, CardapioItemUpdateDto updateDto)
         {
-            var cardapioItem = await _dbContext.CardapioItens.FindAsync(id);
+            var cardapioItem = await _dbContext.CardapioItens.AsNoTracking()
+                .Where(ci => ci.Id == id)
+                .FirstOrDefaultAsync();
+
 
             if (cardapioItem == null)
                 return NotFound();
 
-            cardapioItem.Titulo = updateDto.titulo;
-            cardapioItem.Descricao = updateDto.descricao;
-            cardapioItem.Preco = updateDto.preco;
-            cardapioItem.PossuiPreparo = updateDto.possuiPreparo;
+            if (!cardapioItem.Titulo.Equals(updateDto.titulo))
+                cardapioItem.Titulo = updateDto.titulo;
+
+            if (!cardapioItem.Descricao.Equals(updateDto.descricao))
+                cardapioItem.Descricao = updateDto.descricao;
+
+            if (cardapioItem.Preco != updateDto.preco)
+                cardapioItem.Preco = updateDto.preco;
+
+            if (cardapioItem.PossuiPreparo != updateDto.possuiPreparo)
+                cardapioItem.PossuiPreparo = updateDto.possuiPreparo;
 
             _dbContext.CardapioItens.Update(cardapioItem);
 
             await _dbContext.SaveChangesAsync();
+            var cardapioItemResponse = new CardapioItemUpdateResponseDto(cardapioItem.Titulo, cardapioItem.Descricao, cardapioItem.Preco, cardapioItem.PossuiPreparo);
 
-            return Ok();
+            return Ok(cardapioItemResponse);
         }
 
-        /// <summary>
-        /// Deleta um CardapioItem pelo seu ID
-        /// </summary>
-        /// <param name="id">Id do cardapioItem a ser deletado</param>
-        /// <returns>ActionResult</returns>
-        /// <response code="404">Id não encontrado</response>
-        /// <response code"200">CardapioItem deletado com sucesso</response>
+        [SwaggerOperation(summary: "Exclui um item do cardápio", Description = "Exclui um item do cardápio baseado em um ID")]
+        [SwaggerResponse(204, "Sem conteúdo quando DELETE ocorrer com sucesso")]
+        [SwaggerResponse(404, "Não encontrado quando recurso não existir")]
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteCardapioItem(int id)
         {
-            var cardapioItem = await _dbContext.CardapioItens.FindAsync(id);
+            var cardapioItem = await _dbContext.CardapioItens
+                .AsNoTracking()
+                .FirstOrDefaultAsync(ci => ci.Id == id);
 
             if (cardapioItem == null)
                 return NotFound();

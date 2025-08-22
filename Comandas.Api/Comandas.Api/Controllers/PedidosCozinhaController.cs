@@ -4,6 +4,7 @@ using Comandas.Api.DTOs.PedidoCozinha;
 using Comandas.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Comandas.Api.Controllers;
 
@@ -18,29 +19,40 @@ public class PedidosCozinhaController : ControllerBase
         _dbContext = dbContext;
     }
 
+    [SwaggerOperation(summary: "Retorna uma lista de todos os pedidoCozinha")]
+    [SwaggerResponse(200, "Retorno da lista")]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<PedidoCozinha>>> GetPedidosCozinha()
     {
         return await _dbContext.PedidosCozinha.ToListAsync();
     }
 
+    [SwaggerOperation(summary: "Retorna um PedidoCozinha", description: "Retorna um PedidoCozinha baseado no ID")]
+    [SwaggerResponse(200, "PedidoCozinha encontrado com sucesso")]
+    [SwaggerResponse(404, "PedidoCozinha não encontrado")]
     [HttpGet("{id}")]
     public async Task<ActionResult<PedidoRespondeDto>> GetPedidoCozinha(int id)
     {
-        var pedidoCozinha = await _dbContext.PedidosCozinha.FindAsync(id);
+        var pedidoCozinha = await _dbContext.PedidosCozinha.AsNoTracking()
+            .Where(pc => pc.Id == id)
+            .FirstOrDefaultAsync();
 
         if (pedidoCozinha == null)
             return NotFound();
 
         var pedidoResponse = new PedidoRespondeDto(pedidoCozinha.ComandaId, pedidoCozinha.Situacao);
-        return pedidoResponse;
+        return Ok(pedidoResponse);
     }
 
-
+    [SwaggerOperation(summary: "Avança a situação de um pedidoCozinha", description: "Edita um PedidoCozinha avançando a sua situação")]
+    [SwaggerResponse(200, "PedidoCozinha editado com sucesso")]
+    [SwaggerResponse(404, "PedidoCozinha não encontrado")]
     [HttpPatch("AvancarPedido/")]
     public async Task<ActionResult> AvançarPedido(int pedidoCozinhaId)
     {
-        var pedidoCozinha = await _dbContext.PedidosCozinha.FindAsync(pedidoCozinhaId);
+        var pedidoCozinha = await _dbContext.PedidosCozinha.AsNoTracking()
+             .Where(pc => pc.Id == pedidoCozinhaId)
+             .FirstOrDefaultAsync();
 
         if (pedidoCozinha == null)
             return NotFound();
@@ -65,10 +77,15 @@ public class PedidosCozinhaController : ControllerBase
         return Ok(pedidoCozinha);
     }
 
+    [SwaggerOperation(summary: "Volta a situação de um pedidoCozinha", description: "Edita um PedidoCozinha retornando a sua situação")]
+    [SwaggerResponse(200, "PedidoCozinha editado com sucesso")]
+    [SwaggerResponse(404, "PedidoCozinha não encontrado")]
     [HttpPatch("RetornarPedido/")]
     public async Task<ActionResult> RetornarPedido(int pedidoCozinhaId)
     {
-        var pedidoCozinha = await _dbContext.PedidosCozinha.FindAsync(pedidoCozinhaId);
+        var pedidoCozinha = await _dbContext.PedidosCozinha.AsNoTracking()
+             .Where(pc => pc.Id == pedidoCozinhaId)
+             .FirstOrDefaultAsync();
 
         if (pedidoCozinha == null)
             return NotFound();

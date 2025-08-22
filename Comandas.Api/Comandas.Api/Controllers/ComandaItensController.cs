@@ -3,6 +3,7 @@ using Comandas.Api.DTOs.ComandaItem;
 using Comandas.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Comandas.Api.Controllers
 {
@@ -17,6 +18,9 @@ namespace Comandas.Api.Controllers
             _dbContext = dbContext;
         }
 
+        [SwaggerOperation(summary: "Retorna um ComandaItem", description: "Retorna um ComandaItem baseado em seu ID, também acessa a tabela CardapioItem e retorna o ID")]
+        [SwaggerResponse(404, "ComandaItem não encotrado")]
+        [SwaggerResponse(200, "ComandaItem encontrado com sucesso")]
         [HttpGet("{id}")]
         public async Task<ActionResult<ComandaItemResponseDto>> GetComandaItem(int id)
         {
@@ -35,7 +39,9 @@ namespace Comandas.Api.Controllers
             if (comanItem == null)
                 return NotFound();
 
-            return Ok(comanItem);
+            var responseComandaItem = new ComandaItemResponseDto(comanItem.ComandaId, comanItem.CardapioItemId);
+
+            return Ok(responseComandaItem);
         }
     }
 }

@@ -4,6 +4,7 @@ using Comandas.Api.DTOs.PedidoCozinhaItem;
 using Comandas.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Comandas.Api.Controllers;
 
@@ -18,25 +19,35 @@ public class PedidoCozinhaItensController : ControllerBase
         _dbContext = dbContext;
     }
 
+
+    [SwaggerOperation(summary: "Retorna uma lista de todos os pedidoCozinhaItens")]
+    [SwaggerResponse(200, "Retorno da lista")]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<PedidoCozinhaItem>>> GetPedidosCozinhaItem()
     {
         return await _dbContext.PedidoCozinhaItens.ToListAsync();
     }
 
+    [SwaggerOperation(summary: "Retorna um PedidoCozinhaItem", description: "Retorna um PedidoCozinhaItem baseado no ID")]
+    [SwaggerResponse(200, "PedidoCozinhaItem encontrado com sucesso")]
+    [SwaggerResponse(404, "PedidoCozinhaItem não encontrado")]
     [HttpGet("{id}")]
     public async Task<ActionResult<PedidoCozinhaItemResponseDto>> GetPedidoCozinhaItens(int id)
     {
-        var pedidoCozinhaItem = await _dbContext.PedidoCozinhaItens.FindAsync(id);
+        var pedidoCozinhaItem = await _dbContext.PedidoCozinhaItens.AsNoTracking()
+            .Where(pci => pci.Id == id)
+            .FirstOrDefaultAsync();
 
         if (pedidoCozinhaItem == null)
             return NotFound();
 
         var responseDto = new PedidoCozinhaItemResponseDto(pedidoCozinhaItem.ComandaItemId, pedidoCozinhaItem.PedidoCozinhaId);
 
-        return responseDto;
+        return Ok(responseDto);
     }
 
+    [SwaggerOperation(summary: "Retorna os PedidoCozinhaItens pendentes", description: "Retorna uma lista de todos os pedidos que estão pendentes, retorna o NumeroMesa,NomeCliente,Item e ID do pedidoCozinha")]
+    [SwaggerResponse(200, "Lista retornada com sucesso")]
     [HttpGet("PedidosPendentes/")]
     public async Task<ActionResult<List<PedidoResponseSituacaoDto>>> GetPedidosPendentes()
     {
@@ -69,9 +80,12 @@ public class PedidoCozinhaItensController : ControllerBase
             listaDto.Add(pedidoResponseDto);
         }
 
-        return listaDto;
+        return Ok(listaDto);
     }
 
+
+    [SwaggerOperation(summary: "Retorna os PedidoCozinhaItens em andamento", description: "Retorna uma lista de todos os pedidos que estão em andamento, retorna o NumeroMesa,NomeCliente,Item e ID do pedidoCozinha")]
+    [SwaggerResponse(200, "Lista de pedidos em andamento")]
     [HttpGet("PedidosEmAndamento/")]
     public async Task<ActionResult<List<PedidoResponseSituacaoDto>>> GetPedidosEmAndamento(int pedidoCozinhaId)
     {
@@ -104,9 +118,12 @@ public class PedidoCozinhaItensController : ControllerBase
             listaDto.Add(pedidoResponseDto);
         }
 
-        return listaDto;
+        return Ok(listaDto);
     }
 
+
+    [SwaggerOperation(summary: "Retorna os PedidoCozinhaItens finalizados", description: "Retorna uma lista de todos os pedidos que estão finalizados, retorna o NumeroMesa,NomeCliente,Item e ID do pedidoCozinha")]
+    [SwaggerResponse(200, "Lista retornada com sucesso")]
     [HttpGet("PedidosFinalizados/")]
     public async Task<ActionResult<List<PedidoResponseSituacaoDto>>> GetPedidosFinalizados(int pedidoCozinhaId)
     {
@@ -139,6 +156,6 @@ public class PedidoCozinhaItensController : ControllerBase
             listaDto.Add(pedidoResponseDto);
         }
 
-        return listaDto;
+        return Ok(listaDto);
     }
 }
