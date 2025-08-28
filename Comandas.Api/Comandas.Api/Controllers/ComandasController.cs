@@ -62,9 +62,15 @@ public class ComandasController : ControllerBase
 
     [SwaggerOperation(summary: "Adiciona uma comanda ao banco de dados")]
     [SwaggerResponse(201, "Comanda cadastrada com sucesso")]
+    [SwaggerResponse(422, "Mesa selecionada já está ocupada")]
     [HttpPost]
     public async Task<ActionResult<ComandaCreateResponseDto>> PostComanda(ComandaCreateDto comandaDto)
     {
+        var verificaMesa = await _dbContext.Mesas.AnyAsync(me => me.Numero == comandaDto.NumeroMesa && me.SituacaoMesa);
+
+        if (verificaMesa)
+            return UnprocessableEntity("A mesa selecionada já está ocupada");
+
         var comanda = new Comanda
         {
             NumeroMesa = comandaDto.NumeroMesa,

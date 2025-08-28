@@ -22,9 +22,20 @@ public class PedidosCozinhaController : ControllerBase
     [SwaggerOperation(summary: "Retorna uma lista de todos os pedidoCozinha")]
     [SwaggerResponse(200, "Retorno da lista")]
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<PedidoCozinha>>> GetPedidosCozinha()
+    public async Task<ActionResult<IEnumerable<PedidoResponseDto>>> GetPedidosCozinha(int situacao)
     {
-        return await _dbContext.PedidosCozinha.ToListAsync();
+        //pedido.ID,comanda.NomeCliente,comanda.NumeroMesa,cardapioItem.Titulo
+
+        var pedidos = await _dbContext.PedidosCozinha
+            .Where(pe => pe.Situacao == situacao)
+            .Include(pe => pe.Comanda)
+            .Include(pe => pe.PedidoCozinhaItens)
+                .ThenInclude(pci => pci.ComandaItem)
+                    .ThenInclude(ci => ci.CardapioItem)
+            .Select(pe => new PedidoResponseDto(pe.Id, pe.Comanda.NumeroMesa, pe.Comanda.NomeCliente, pe.PedidoCozinhaItens.First().ComandaItem.CardapioItem.Titulo))
+            .ToListAsync();
+
+        return pedidos;
     }
 
     [SwaggerOperation(summary: "Retorna um PedidoCozinha", description: "Retorna um PedidoCozinha baseado no ID")]

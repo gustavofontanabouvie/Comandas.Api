@@ -63,24 +63,17 @@ public class PedidoCozinhaItensController : ControllerBase
                              where pedidoCozinha.Situacao == 1
                              && comanda.SituacaoComanda
                              && pedidoCozinhaItem.ComandaItemId == comandaItem.Id
-                             select new
-                             {
+                             select new PedidoResponseSituacaoDto
+                             (
+
                                  comanda.NumeroMesa,
                                  comanda.NomeCliente,
                                  cardapioItem.Titulo,
                                  pedidoCozinha.Id
-                             }
+                             )
                                       ).ToListAsync();
 
-        List<PedidoResponseSituacaoDto> listaDto = new();
-
-        foreach (var pedido in pedidos)
-        {
-            var pedidoResponseDto = new PedidoResponseSituacaoDto(pedido.NumeroMesa, pedido.NomeCliente, pedido.Titulo);
-            listaDto.Add(pedidoResponseDto);
-        }
-
-        return Ok(listaDto);
+        return Ok(pedidos);
     }
 
 
@@ -114,7 +107,7 @@ public class PedidoCozinhaItensController : ControllerBase
 
         foreach (var pedido in pedidos)
         {
-            var pedidoResponseDto = new PedidoResponseSituacaoDto(pedido.NumeroMesa, pedido.NomeCliente, pedido.Titulo);
+            var pedidoResponseDto = new PedidoResponseSituacaoDto(pedido.NumeroMesa, pedido.NomeCliente, pedido.Titulo, pedido.Id);
             listaDto.Add(pedidoResponseDto);
         }
 
@@ -152,7 +145,7 @@ public class PedidoCozinhaItensController : ControllerBase
 
         foreach (var pedido in pedidos)
         {
-            var pedidoResponseDto = new PedidoResponseSituacaoDto(pedido.NumeroMesa, pedido.NomeCliente, pedido.Titulo);
+            var pedidoResponseDto = new PedidoResponseSituacaoDto(pedido.NumeroMesa, pedido.NomeCliente, pedido.Titulo, pedido.Id);
             listaDto.Add(pedidoResponseDto);
         }
 

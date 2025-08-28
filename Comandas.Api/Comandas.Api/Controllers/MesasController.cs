@@ -52,9 +52,14 @@ public class MesasController : ControllerBase
 
     [SwaggerOperation(summary: "Cria uma Mesa")]
     [SwaggerResponse(201, "Mesa criada com sucesso")]
+    [SwaggerResponse(422, "Ja possui uma mesa com essa numeração")]
     [HttpPost]
     public async Task<ActionResult<MesaCreateDto>> PostMesa(MesaCreateDto mesaDto)
     {
+        var verificaMesa = await _dbContext.Mesas.AnyAsync(me => me.Numero == mesaDto.numero);
+        if (verificaMesa == true)
+            return UnprocessableEntity();
+
         var mesa = new Mesa
         {
             Numero = mesaDto.numero
