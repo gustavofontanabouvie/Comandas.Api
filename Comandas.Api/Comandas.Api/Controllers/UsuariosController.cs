@@ -4,10 +4,14 @@ using Comandas.Api.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 
 namespace Comandas.Api.Controllers;
-[Authorize]
+
 [Route("api/[controller]")]
 [ApiController]
 public class UsuariosController : ControllerBase
@@ -35,6 +39,7 @@ public class UsuariosController : ControllerBase
         return usuarioResposta;
     }
 
+    [Authorize]
     [HttpGet("{id}")]
     public async Task<ActionResult<UsuarioResponseDto>> GetUsuario(int id)
     {
@@ -65,5 +70,41 @@ public class UsuariosController : ControllerBase
         var responseDto = new UsuarioResponseDto(usuario.Nome, usuario.Email);
 
         return CreatedAtAction("GetUsuario", new { id = usuario.Id }, responseDto);
+    }
+
+    [HttpPost("login")]
+    public async Task<ActionResult<UsuarioLoginResponseDto>> LoginUser([FromBody] UsuarioLoginRequest loginRequest)
+    {
+        var usuario = await _dbContext.Usuarios.FirstOrDefaultAsync(us => us.Email == loginRequest.email);
+
+        if (usuario == null)
+            return NotFound("Email Inválido");
+
+        if (!loginRequest.senha.Equals(usuario.Senha))
+        {
+            return NotFound("Senha Inválida");
+        }
+
+        var secret = Encoding.UTF8.GetBytes("3e8acfc238f45a314fd4b2bde272678ad30bd1774743a11dbc5c53ac71ca494b");
+
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Expires = DateTime.UtcNow.AddMinutes(1),
+            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(secret), SecurityAlgorithms.HmacSha256Signature),
+            Subject = new ClaimsIdentity(
+                new Claim[]
+                {
+                    new Claim(ClaimTypes.Name,usuario.Email),
+                    new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString())
+                }
+                )
+        };
+
+        var tokenGenerator = new JwtSecurityTokenHandler();
+        var token = tokenGenerator.CreateToken(tokenDescriptor);
+
+        var tokenFinal = tokenGenerator.WriteToken(token);
+
+        return Ok(new UsuarioLoginResponseDto(usuario.Email, tokenFinal));
     }
 }
