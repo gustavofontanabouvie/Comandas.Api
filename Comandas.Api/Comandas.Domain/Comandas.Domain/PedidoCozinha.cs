@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 
-namespace Comandas.Api.Models;
+namespace Comandas.Domain;
 
-public class ComandaItem
+public class PedidoCozinha
 {
 
     [Key]
@@ -13,9 +13,7 @@ public class ComandaItem
     public int ComandaId { get; set; }
 
     public virtual Comanda Comanda { get; set; }
+    public int Situacao { get; set; }
 
-    public int CardapioItemId { get; set; }
-
-    public virtual CardapioItem CardapioItem { get; set; }
-
+    public virtual ICollection<PedidoCozinhaItem> PedidoCozinhaItens { get; set; }
 }

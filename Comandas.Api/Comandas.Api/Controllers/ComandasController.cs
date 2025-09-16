@@ -1,6 +1,6 @@
 ﻿using Comandas.Api.Database;
 using Comandas.Api.DTOs.Comanda;
-using Comandas.Api.Models;
+using Comandas.Domain;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;

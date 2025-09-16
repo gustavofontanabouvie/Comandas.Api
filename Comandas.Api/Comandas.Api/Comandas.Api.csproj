@@ -27,4 +27,9 @@
 		<PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="7.2.0" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <ProjectReference Include="..\Comandas.Application\Comandas.Application\Comandas.Application.csproj" />
+	  <ProjectReference Include="..\Comandas.Domain\Comandas.Domain\Comandas.Domain.csproj" />
+	</ItemGroup>
+
 </Project>

@@ -1,4 +1,6 @@
 using Comandas.Api.Database;
+using Comandas.Application.Interfaces;
+using Comandas.Application.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,6 +25,8 @@ builder.Services.AddDbContext<ComandasDbContext>
     });
 
 // Add services to the container.
+builder.Services.AddScoped<IMesaService, MesaService>();
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

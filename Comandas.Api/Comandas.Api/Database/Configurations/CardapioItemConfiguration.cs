@@ -1,4 +1,4 @@
-﻿using Comandas.Api.Models;
+﻿using Comandas.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;

@@ -1,6 +1,6 @@
 ﻿using System.Reflection.Emit;
 using Comandas.Api.Database.Configurations;
-using Comandas.Api.Models;
+using Comandas.Domain;
 using Microsoft.EntityFrameworkCore;
 
 

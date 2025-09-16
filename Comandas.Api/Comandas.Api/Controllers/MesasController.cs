@@ -1,6 +1,6 @@
 ﻿using Comandas.Api.Database;
 using Comandas.Api.DTOs.Mesa;
-using Comandas.Api.Models;
+using Comandas.Domain;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;

@@ -1,6 +1,6 @@
 ﻿using Comandas.Api.Database;
 using Comandas.Api.DTOs.Usuario;
-using Comandas.Api.Models;
+using Comandas.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -94,8 +94,8 @@ public class UsuariosController : ControllerBase
             Subject = new ClaimsIdentity(
                 new Claim[]
                 {
-                    new Claim(ClaimTypes.Name,usuario.Email),
-                    new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString())
+                    //new Claim(ClaimTypes.Name,usuario.Email),
+                    //new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString())
                 }
                 )
         };

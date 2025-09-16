@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel;
 
-namespace Comandas.Api.Models;
+namespace Comandas.Domain;
 
 public class Usuario
 {

@@ -1,7 +1,6 @@
 ﻿
 using Comandas.Api.Database;
 using Comandas.Api.DTOs.PedidoCozinha;
-using Comandas.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
