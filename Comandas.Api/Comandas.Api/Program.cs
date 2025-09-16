@@ -1,6 +1,7 @@
 using Comandas.Api.Database;
 using Comandas.Application.Interfaces;
 using Comandas.Application.Services;
+using Comandas.Domain;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,6 +27,14 @@ builder.Services.AddDbContext<ComandasDbContext>
 
 // Add services to the container.
 builder.Services.AddScoped<IMesaService, MesaService>();
+builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+builder.Services.AddScoped<IComandaService, ComandaService>();
+builder.Services.AddScoped<ICardapioItemService, CardapioItemService>();
+builder.Services.AddScoped<IComandaItemService, ComandaItemService>();
+builder.Services.AddScoped<IPedidoCozinhaService, PedidoCozinhaService>();
+builder.Services.AddScoped<IPedidoCozinhaItemService, PedidoCozinhaItemService>();
+
+
 
 builder.Services.AddAuthentication(options =>
 {
