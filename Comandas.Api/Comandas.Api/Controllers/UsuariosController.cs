@@ -1,5 +1,6 @@
 ﻿using Comandas.Api.Database;
 using Comandas.Api.DTOs.Usuario;
+using Comandas.Application.Interfaces;
 using Comandas.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -8,6 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Threading;
 
 
 namespace Comandas.Api.Controllers;
@@ -16,9 +18,9 @@ namespace Comandas.Api.Controllers;
 [ApiController]
 public class UsuariosController : ControllerBase
 {
-    private readonly ComandasDbContext _dbContext;
+    private readonly IComandasDbContext _dbContext;
 
-    public UsuariosController(ComandasDbContext dbContext)
+    public UsuariosController(IComandasDbContext dbContext)
     {
         _dbContext = dbContext;
     }
@@ -54,7 +56,7 @@ public class UsuariosController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<UsuarioResponseDto>> PostUsuario(UsuarioCreateDto usuarioCreateDto)
+    public async Task<ActionResult<UsuarioResponseDto>> PostUsuario(UsuarioCreateDto usuarioCreateDto, CancellationToken cancellationToken)
     {
         var usuario = new Usuario
         {
@@ -65,7 +67,7 @@ public class UsuariosController : ControllerBase
 
         _dbContext.Usuarios.Add(usuario);
 
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync(cancellationToken);
 
         var responseDto = new UsuarioResponseDto(usuario.Nome, usuario.Email);
 

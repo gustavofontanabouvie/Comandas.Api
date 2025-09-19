@@ -1,5 +1,6 @@
 ﻿using Comandas.Api.Database;
 using Comandas.Api.DTOs.ComandaItem;
+using Comandas.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
@@ -10,9 +11,9 @@ namespace Comandas.Api.Controllers
     [ApiController]
     public class ComandaItensController : ControllerBase
     {
-        private readonly ComandasDbContext _dbContext;
+        private readonly IComandasDbContext _dbContext;
 
-        public ComandaItensController(ComandasDbContext dbContext)
+        public ComandaItensController(IComandasDbContext dbContext)
         {
             _dbContext = dbContext;
         }

@@ -1,11 +1,11 @@
 ﻿using Comandas.Api.Database;
 using Comandas.Api.DTOs.Comanda;
+using Comandas.Application.Interfaces;
 using Comandas.Domain;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Swashbuckle.AspNetCore.Annotations;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+using System.Threading;
 
 namespace Comandas.Api.Controllers;
 
@@ -15,8 +15,8 @@ namespace Comandas.Api.Controllers;
 public class ComandasController : ControllerBase
 {
 
-    private readonly ComandasDbContext _dbContext;
-    public ComandasController(ComandasDbContext context)
+    private readonly IComandasDbContext _dbContext;
+    public ComandasController(IComandasDbContext context)
     {
         _dbContext = context;
     }
@@ -64,7 +64,7 @@ public class ComandasController : ControllerBase
     [SwaggerResponse(201, "Comanda cadastrada com sucesso")]
     [SwaggerResponse(422, "Mesa selecionada já está ocupada")]
     [HttpPost]
-    public async Task<ActionResult<ComandaCreateResponseDto>> PostComanda(ComandaCreateDto comandaDto)
+    public async Task<ActionResult<ComandaCreateResponseDto>> PostComanda(ComandaCreateDto comandaDto, CancellationToken cancellationToken)
     {
         var verificaMesa = await _dbContext.Mesas.AnyAsync(me => me.Numero == comandaDto.NumeroMesa && me.SituacaoMesa);
 
@@ -112,7 +112,7 @@ public class ComandasController : ControllerBase
         }
 
 
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync(cancellationToken);
 
         var comandaResponse = new ComandaCreateResponseDto(comanda.Id, comanda.NumeroMesa, comanda.NomeCliente);
 
@@ -124,7 +124,7 @@ public class ComandasController : ControllerBase
     [SwaggerResponse(201, "Comanda editada com sucesso")]
     [SwaggerResponse(404, "Comanda não encontrada")]
     [HttpPut("{id}")]
-    public async Task<ActionResult<ComandaUpdateResponseDto>> PutComanda(int id, ComandaUpdateDto updateDto)
+    public async Task<ActionResult<ComandaUpdateResponseDto>> PutComanda(int id, ComandaUpdateDto updateDto, CancellationToken cancellationToken)
     {
         var comanda = await _dbContext.Comandas.AsNoTracking()
             .Where(c => c.Id == id)
@@ -175,7 +175,7 @@ public class ComandasController : ControllerBase
             }
         }
 
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync(cancellationToken);
 
         var updateResponse = new ComandaUpdateResponseDto(comanda.Id, comanda.NumeroMesa, comanda.NomeCliente);
 
@@ -187,7 +187,7 @@ public class ComandasController : ControllerBase
     [SwaggerResponse(204, "Comanda deletada com sucesso")]
     [SwaggerResponse(404, "Comanda não encontrada")]
     [HttpDelete("{id}")]
-    public async Task<ActionResult> DeleteComanda(int id)
+    public async Task<ActionResult> DeleteComanda(int id, CancellationToken cancellationToken)
     {
         var comanda = await _dbContext.Comandas.AsNoTracking()
             .Where(c => c.Id == id)
@@ -197,7 +197,7 @@ public class ComandasController : ControllerBase
             return NotFound();
 
         _dbContext.Comandas.Remove(comanda);
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync(cancellationToken);
 
         return NoContent();
     }

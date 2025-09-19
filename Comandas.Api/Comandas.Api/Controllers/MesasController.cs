@@ -1,9 +1,11 @@
 ﻿using Comandas.Api.Database;
 using Comandas.Api.DTOs.Mesa;
+using Comandas.Application.Interfaces;
 using Comandas.Domain;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Threading;
 
 namespace Comandas.Api.Controllers;
 
@@ -12,9 +14,9 @@ namespace Comandas.Api.Controllers;
 [ApiController]
 public class MesasController : ControllerBase
 {
-    private readonly ComandasDbContext _dbContext;
+    private readonly IComandasDbContext _dbContext;
 
-    public MesasController(ComandasDbContext dbContext)
+    public MesasController(IComandasDbContext dbContext)
     {
         _dbContext = dbContext;
     }
@@ -54,7 +56,7 @@ public class MesasController : ControllerBase
     [SwaggerResponse(201, "Mesa criada com sucesso")]
     [SwaggerResponse(422, "Ja possui uma mesa com essa numeração")]
     [HttpPost]
-    public async Task<ActionResult<MesaCreateDto>> PostMesa(MesaCreateDto mesaDto)
+    public async Task<ActionResult<MesaCreateDto>> PostMesa(MesaCreateDto mesaDto, CancellationToken cancellationToken)
     {
         var verificaMesa = await _dbContext.Mesas.AnyAsync(me => me.Numero == mesaDto.numero);
         if (verificaMesa == true)
@@ -66,7 +68,7 @@ public class MesasController : ControllerBase
         };
 
         _dbContext.Mesas.Add(mesa);
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync(cancellationToken);
 
         var mesaCreateDto = new MesaCreateDto(mesa.Numero);
 

@@ -1,9 +1,11 @@
 ﻿
 using Comandas.Api.Database;
 using Comandas.Api.DTOs.PedidoCozinha;
+using Comandas.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Threading;
 
 namespace Comandas.Api.Controllers;
 
@@ -11,9 +13,9 @@ namespace Comandas.Api.Controllers;
 [ApiController]
 public class PedidosCozinhaController : ControllerBase
 {
-    private readonly ComandasDbContext _dbContext;
+    private readonly IComandasDbContext _dbContext;
 
-    public PedidosCozinhaController(ComandasDbContext dbContext)
+    public PedidosCozinhaController(IComandasDbContext dbContext)
     {
         _dbContext = dbContext;
     }
@@ -58,7 +60,7 @@ public class PedidosCozinhaController : ControllerBase
     [SwaggerResponse(200, "PedidoCozinha editado com sucesso")]
     [SwaggerResponse(404, "PedidoCozinha não encontrado")]
     [HttpPatch("AvancarPedido/")]
-    public async Task<ActionResult> AvançarPedido(int pedidoCozinhaId)
+    public async Task<ActionResult> AvançarPedido(int pedidoCozinhaId, CancellationToken cancellationToken)
     {
         var pedidoCozinha = await _dbContext.PedidosCozinha.AsNoTracking()
              .Where(pc => pc.Id == pedidoCozinhaId)
@@ -82,7 +84,7 @@ public class PedidosCozinhaController : ControllerBase
 
         _dbContext.PedidosCozinha.Update(pedidoCozinha);
 
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync(cancellationToken);
 
         return Ok(pedidoCozinha);
     }
@@ -91,7 +93,7 @@ public class PedidosCozinhaController : ControllerBase
     [SwaggerResponse(200, "PedidoCozinha editado com sucesso")]
     [SwaggerResponse(404, "PedidoCozinha não encontrado")]
     [HttpPatch("RetornarPedido/")]
-    public async Task<ActionResult> RetornarPedido(int pedidoCozinhaId)
+    public async Task<ActionResult> RetornarPedido(int pedidoCozinhaId, CancellationToken cancellationToken)
     {
         var pedidoCozinha = await _dbContext.PedidosCozinha.AsNoTracking()
              .Where(pc => pc.Id == pedidoCozinhaId)
@@ -115,7 +117,7 @@ public class PedidosCozinhaController : ControllerBase
 
         _dbContext.PedidosCozinha.Update(pedidoCozinha);
 
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync(cancellationToken);
 
         return Ok(pedidoCozinha);
     }

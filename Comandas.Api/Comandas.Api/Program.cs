@@ -18,7 +18,7 @@ ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProt
 var builder = WebApplication.CreateBuilder(args);
 
 
-builder.Services.AddDbContext<ComandasDbContext>
+builder.Services.AddDbContext<IComandasDbContext, ComandasDbContext>
     (options =>
     {
         options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")).EnableSensitiveDataLogging();

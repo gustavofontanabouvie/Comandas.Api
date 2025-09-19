@@ -1,9 +1,11 @@
 ﻿using Comandas.Api.Database;
 using Comandas.Api.DTOs.CardapioItem;
+using Comandas.Application.Interfaces;
 using Comandas.Domain;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Threading;
 
 
 namespace Comandas.Api.Controllers
@@ -12,9 +14,9 @@ namespace Comandas.Api.Controllers
     [ApiController]
     public class CardapioItensController : ControllerBase
     {
-        private readonly ComandasDbContext _dbContext;
+        private readonly IComandasDbContext _dbContext;
 
-        public CardapioItensController(ComandasDbContext dbContext)
+        public CardapioItensController(IComandasDbContext dbContext)
         {
             _dbContext = dbContext;
         }
@@ -23,7 +25,7 @@ namespace Comandas.Api.Controllers
         [SwaggerOperation(summary: "Criação de um novo CardapioItem")]
         [SwaggerResponse(201, "Caso o item seja criado com sucesso")]
         [HttpPost]
-        public async Task<ActionResult<CardapioItemCreateResponseDto>> PostCardapioItem(CardapioItemCreateDto cardapioItemCreateDto)
+        public async Task<ActionResult<CardapioItemCreateResponseDto>> PostCardapioItem(CardapioItemCreateDto cardapioItemCreateDto, CancellationToken cancellationToken)
         {
             var cardapioItem = new CardapioItem
             {
@@ -34,7 +36,7 @@ namespace Comandas.Api.Controllers
             };
 
             _dbContext.CardapioItens.Add(cardapioItem);
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync(cancellationToken);
 
             var responseDto = new CardapioItemCreateResponseDto(cardapioItem.Id, cardapioItem.Titulo, cardapioItem.Descricao, cardapioItem.PossuiPreparo);
 
@@ -73,7 +75,7 @@ namespace Comandas.Api.Controllers
         [SwaggerResponse(404, "Item não encontrado")]
         [SwaggerResponse(200, "Item editado com sucesso")]
         [HttpPut("{id}")]
-        public async Task<ActionResult<CardapioItemUpdateResponseDto>> UpdateCardapioItem(int id, CardapioItemUpdateDto updateDto)
+        public async Task<ActionResult<CardapioItemUpdateResponseDto>> UpdateCardapioItem(int id, CardapioItemUpdateDto updateDto, CancellationToken cancellationToken)
         {
             var cardapioItem = await _dbContext.CardapioItens.AsNoTracking()
                 .Where(ci => ci.Id == id)
@@ -97,7 +99,7 @@ namespace Comandas.Api.Controllers
 
             _dbContext.CardapioItens.Update(cardapioItem);
 
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync(cancellationToken);
             var cardapioItemResponse = new CardapioItemUpdateResponseDto(cardapioItem.Titulo, cardapioItem.Descricao, cardapioItem.Preco, cardapioItem.PossuiPreparo);
 
             return Ok(cardapioItemResponse);
@@ -107,7 +109,7 @@ namespace Comandas.Api.Controllers
         [SwaggerResponse(204, "Sem conteúdo quando DELETE ocorrer com sucesso")]
         [SwaggerResponse(404, "Não encontrado quando recurso não existir")]
         [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteCardapioItem(int id)
+        public async Task<ActionResult> DeleteCardapioItem(int id, CancellationToken cancellationToken)
         {
             var cardapioItem = await _dbContext.CardapioItens
                 .AsNoTracking()
@@ -117,7 +119,7 @@ namespace Comandas.Api.Controllers
                 return NotFound();
 
             _dbContext.CardapioItens.Remove(cardapioItem);
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync(cancellationToken);
 
             return NoContent();
         }

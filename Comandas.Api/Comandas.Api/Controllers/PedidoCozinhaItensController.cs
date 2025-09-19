@@ -1,6 +1,7 @@
 ﻿
 using Comandas.Api.Database;
 using Comandas.Api.DTOs.PedidoCozinhaItem;
+using Comandas.Application.Interfaces;
 using Comandas.Domain;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,9 +13,9 @@ namespace Comandas.Api.Controllers;
 [ApiController]
 public class PedidoCozinhaItensController : ControllerBase
 {
-    private readonly ComandasDbContext _dbContext;
+    private readonly IComandasDbContext _dbContext;
 
-    public PedidoCozinhaItensController(ComandasDbContext dbContext)
+    public PedidoCozinhaItensController(IComandasDbContext dbContext)
     {
         _dbContext = dbContext;
     }
