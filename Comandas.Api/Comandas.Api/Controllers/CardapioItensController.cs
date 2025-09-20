@@ -14,11 +14,11 @@ namespace Comandas.Api.Controllers
     [ApiController]
     public class CardapioItensController : ControllerBase
     {
-        private readonly IComandasDbContext _dbContext;
+        private readonly ICardapioItemService _cardapioItemService;
 
-        public CardapioItensController(IComandasDbContext dbContext)
+        public CardapioItensController(ICardapioItemService cardapioItemService)
         {
-            _dbContext = dbContext;
+            _cardapioItemService = cardapioItemService;
         }
 
 
@@ -35,8 +35,8 @@ namespace Comandas.Api.Controllers
                 PossuiPreparo = cardapioItemCreateDto.possuiPreparo
             };
 
-            _dbContext.CardapioItens.Add(cardapioItem);
-            await _dbContext.SaveChangesAsync(cancellationToken);
+            //_dbContext.CardapioItens.Add(cardapioItem);
+            //await _dbContext.SaveChangesAsync(cancellationToken);
 
             var responseDto = new CardapioItemCreateResponseDto(cardapioItem.Id, cardapioItem.Titulo, cardapioItem.Descricao, cardapioItem.PossuiPreparo);
 
@@ -44,84 +44,84 @@ namespace Comandas.Api.Controllers
         }
 
 
-        [SwaggerOperation(summary: "Retorno de uma lista com todos os cardapioItens cadastrados")]
-        [SwaggerResponse(200, "Retorna a lista dos CardapioItens")]
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<CardapioItem>>> GetCardapioItens()
-        {
-            return await _dbContext.CardapioItens.ToListAsync();
-        }
+        //[SwaggerOperation(summary: "Retorno de uma lista com todos os cardapioItens cadastrados")]
+        //[SwaggerResponse(200, "Retorna a lista dos CardapioItens")]
+        //[HttpGet]
+        //public async Task<ActionResult<IEnumerable<CardapioItem>>> GetCardapioItens()
+        //{
+        //    //return await _dbContext.CardapioItens.ToListAsync();
+        //}
 
 
-        [SwaggerOperation(summary: "Retorna um cardapioItem", description: "Retorna um cardápioItem baseado em um ID")]
-        [SwaggerResponse(404, "CardapioItem não encontrado")]
-        [SwaggerResponse(200, "CardapioItem encontrado com sucesso")]
-        [HttpGet("{id}")]
-        public async Task<ActionResult<CardapioItemByIdDto>> GetCardapioItem(int id)
-        {
-            var cardapioItem = await _dbContext.CardapioItens.AsNoTracking()
-                .Where(ci => ci.Id == id)
-                .Select(ci => new CardapioItemByIdDto(ci.Titulo, ci.Descricao, ci.Preco))
-                .TagWith(nameof(GetCardapioItem))
-                .FirstOrDefaultAsync();
+        //[SwaggerOperation(summary: "Retorna um cardapioItem", description: "Retorna um cardápioItem baseado em um ID")]
+        //[SwaggerResponse(404, "CardapioItem não encontrado")]
+        //[SwaggerResponse(200, "CardapioItem encontrado com sucesso")]
+        //[HttpGet("{id}")]
+        //public async Task<ActionResult<CardapioItemByIdDto>> GetCardapioItem(int id)
+        //{
+        //    //var cardapioItem = await _dbContext.CardapioItens.AsNoTracking()
+        //    //    .Where(ci => ci.Id == id)
+        //    //    .Select(ci => new CardapioItemByIdDto(ci.Titulo, ci.Descricao, ci.Preco))
+        //    //    .TagWith(nameof(GetCardapioItem))
+        //    //    .FirstOrDefaultAsync();
 
-            if (cardapioItem == null)
-                return NotFound();
+        //    //if (cardapioItem == null)
+        //    //    return NotFound();
 
-            return Ok(cardapioItem);
-        }
+        //    //return Ok(cardapioItem);
+        //}
 
-        [SwaggerOperation(summary: "Edita um CardapioItem", description: "Verifica se os campos a editar são iguais e edita um CardapioItem pelo ID")]
-        [SwaggerResponse(404, "Item não encontrado")]
-        [SwaggerResponse(200, "Item editado com sucesso")]
-        [HttpPut("{id}")]
-        public async Task<ActionResult<CardapioItemUpdateResponseDto>> UpdateCardapioItem(int id, CardapioItemUpdateDto updateDto, CancellationToken cancellationToken)
-        {
-            var cardapioItem = await _dbContext.CardapioItens.AsNoTracking()
-                .Where(ci => ci.Id == id)
-                .FirstOrDefaultAsync();
+        //[SwaggerOperation(summary: "Edita um CardapioItem", description: "Verifica se os campos a editar são iguais e edita um CardapioItem pelo ID")]
+        //[SwaggerResponse(404, "Item não encontrado")]
+        //[SwaggerResponse(200, "Item editado com sucesso")]
+        //[HttpPut("{id}")]
+        //public async Task<ActionResult<CardapioItemUpdateResponseDto>> UpdateCardapioItem(int id, CardapioItemUpdateDto updateDto, CancellationToken cancellationToken)
+        //{
+        //    var cardapioItem = await _dbContext.CardapioItens.AsNoTracking()
+        //        .Where(ci => ci.Id == id)
+        //        .FirstOrDefaultAsync();
 
 
-            if (cardapioItem == null)
-                return NotFound();
+        //    if (cardapioItem == null)
+        //        return NotFound();
 
-            if (!cardapioItem.Titulo.Equals(updateDto.titulo))
-                cardapioItem.Titulo = updateDto.titulo;
+        //    if (!cardapioItem.Titulo.Equals(updateDto.titulo))
+        //        cardapioItem.Titulo = updateDto.titulo;
 
-            if (!cardapioItem.Descricao.Equals(updateDto.descricao))
-                cardapioItem.Descricao = updateDto.descricao;
+        //    if (!cardapioItem.Descricao.Equals(updateDto.descricao))
+        //        cardapioItem.Descricao = updateDto.descricao;
 
-            if (cardapioItem.Preco != updateDto.preco)
-                cardapioItem.Preco = updateDto.preco;
+        //    if (cardapioItem.Preco != updateDto.preco)
+        //        cardapioItem.Preco = updateDto.preco;
 
-            if (cardapioItem.PossuiPreparo != updateDto.possuiPreparo)
-                cardapioItem.PossuiPreparo = updateDto.possuiPreparo;
+        //    if (cardapioItem.PossuiPreparo != updateDto.possuiPreparo)
+        //        cardapioItem.PossuiPreparo = updateDto.possuiPreparo;
 
-            _dbContext.CardapioItens.Update(cardapioItem);
+        //    _dbContext.CardapioItens.Update(cardapioItem);
 
-            await _dbContext.SaveChangesAsync(cancellationToken);
-            var cardapioItemResponse = new CardapioItemUpdateResponseDto(cardapioItem.Titulo, cardapioItem.Descricao, cardapioItem.Preco, cardapioItem.PossuiPreparo);
+        //    await _dbContext.SaveChangesAsync(cancellationToken);
+        //    var cardapioItemResponse = new CardapioItemUpdateResponseDto(cardapioItem.Titulo, cardapioItem.Descricao, cardapioItem.Preco, cardapioItem.PossuiPreparo);
 
-            return Ok(cardapioItemResponse);
-        }
+        //    return Ok(cardapioItemResponse);
+        //}
 
-        [SwaggerOperation(summary: "Exclui um item do cardápio", Description = "Exclui um item do cardápio baseado em um ID")]
-        [SwaggerResponse(204, "Sem conteúdo quando DELETE ocorrer com sucesso")]
-        [SwaggerResponse(404, "Não encontrado quando recurso não existir")]
-        [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteCardapioItem(int id, CancellationToken cancellationToken)
-        {
-            var cardapioItem = await _dbContext.CardapioItens
-                .AsNoTracking()
-                .FirstOrDefaultAsync(ci => ci.Id == id);
+        //[SwaggerOperation(summary: "Exclui um item do cardápio", Description = "Exclui um item do cardápio baseado em um ID")]
+        //[SwaggerResponse(204, "Sem conteúdo quando DELETE ocorrer com sucesso")]
+        //[SwaggerResponse(404, "Não encontrado quando recurso não existir")]
+        //[HttpDelete("{id}")]
+        //public async Task<ActionResult> DeleteCardapioItem(int id, CancellationToken cancellationToken)
+        //{
+        //    var cardapioItem = await _dbContext.CardapioItens
+        //        .AsNoTracking()
+        //        .FirstOrDefaultAsync(ci => ci.Id == id);
 
-            if (cardapioItem == null)
-                return NotFound();
+        //    if (cardapioItem == null)
+        //        return NotFound();
 
-            _dbContext.CardapioItens.Remove(cardapioItem);
-            await _dbContext.SaveChangesAsync(cancellationToken);
+        //    _dbContext.CardapioItens.Remove(cardapioItem);
+        //    await _dbContext.SaveChangesAsync(cancellationToken);
 
-            return NoContent();
-        }
+        //    return NoContent();
+        //}
     }
 }

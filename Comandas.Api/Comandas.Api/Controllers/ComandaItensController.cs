@@ -11,37 +11,37 @@ namespace Comandas.Api.Controllers
     [ApiController]
     public class ComandaItensController : ControllerBase
     {
-        private readonly IComandasDbContext _dbContext;
+        //private readonly IComandasDbContext _dbContext;
 
-        public ComandaItensController(IComandasDbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
+        //public ComandaItensController(IComandasDbContext dbContext)
+        //{
+        //    _dbContext = dbContext;
+        //}
 
-        [SwaggerOperation(summary: "Retorna um ComandaItem", description: "Retorna um ComandaItem baseado em seu ID, também acessa a tabela CardapioItem e retorna o ID")]
-        [SwaggerResponse(404, "ComandaItem não encotrado")]
-        [SwaggerResponse(200, "ComandaItem encontrado com sucesso")]
-        [HttpGet("{id}")]
-        public async Task<ActionResult<ComandaItemResponseDto>> GetComandaItem(int id)
-        {
-            var comanItem = await (from comandaItem in _dbContext.ComandaItens
-                                   join comanda in _dbContext.Comandas
-                                     on comandaItem.ComandaId equals comanda.Id
-                                   join cardapioItem in _dbContext.CardapioItens
-                                     on comandaItem.CardapioItemId equals cardapioItem.Id
-                                   where comandaItem.Id == id
-                                   select new
-                                   {
-                                       ComandaId = comanda.Id,
-                                       CardapioItemId = cardapioItem.Id
-                                   }).FirstOrDefaultAsync();
+        //[SwaggerOperation(summary: "Retorna um ComandaItem", description: "Retorna um ComandaItem baseado em seu ID, também acessa a tabela CardapioItem e retorna o ID")]
+        //[SwaggerResponse(404, "ComandaItem não encotrado")]
+        //[SwaggerResponse(200, "ComandaItem encontrado com sucesso")]
+        //[HttpGet("{id}")]
+        //public async Task<ActionResult<ComandaItemResponseDto>> GetComandaItem(int id)
+        //{
+        //    var comanItem = await (from comandaItem in _dbContext.ComandaItens
+        //                           join comanda in _dbContext.Comandas
+        //                             on comandaItem.ComandaId equals comanda.Id
+        //                           join cardapioItem in _dbContext.CardapioItens
+        //                             on comandaItem.CardapioItemId equals cardapioItem.Id
+        //                           where comandaItem.Id == id
+        //                           select new
+        //                           {
+        //                               ComandaId = comanda.Id,
+        //                               CardapioItemId = cardapioItem.Id
+        //                           }).FirstOrDefaultAsync();
 
-            if (comanItem == null)
-                return NotFound();
+        //    if (comanItem == null)
+        //        return NotFound();
 
-            var responseComandaItem = new ComandaItemResponseDto(comanItem.ComandaId, comanItem.CardapioItemId);
+        //    var responseComandaItem = new ComandaItemResponseDto(comanItem.ComandaId, comanItem.CardapioItemId);
 
-            return Ok(responseComandaItem);
-        }
+        //    return Ok(responseComandaItem);
+        //}
     }
 }

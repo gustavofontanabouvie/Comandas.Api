@@ -1,5 +1,4 @@
 ﻿using Comandas.Api.Database.Configurations;
-using Comandas.Application.Interfaces;
 using Comandas.Domain;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Comandas.Api.Database;
 
-public class ComandasDbContext : DbContext, IComandasDbContext
+public class ComandasDbContext : DbContext
 {
 
     public ComandasDbContext(DbContextOptions<ComandasDbContext> options)

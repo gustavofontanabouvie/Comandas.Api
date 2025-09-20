@@ -1,6 +1,8 @@
 using Comandas.Api.Database;
 using Comandas.Application.Interfaces;
 using Comandas.Application.Services;
+using Comandas.Data.Repositories.Implementation;
+using Comandas.Data.Repositories.Interface;
 using Comandas.Domain;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -18,7 +20,7 @@ ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProt
 var builder = WebApplication.CreateBuilder(args);
 
 
-builder.Services.AddDbContext<IComandasDbContext, ComandasDbContext>
+builder.Services.AddDbContext<ComandasDbContext>
     (options =>
     {
         options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")).EnableSensitiveDataLogging();
@@ -33,6 +35,14 @@ builder.Services.AddScoped<ICardapioItemService, CardapioItemService>();
 builder.Services.AddScoped<IComandaItemService, ComandaItemService>();
 builder.Services.AddScoped<IPedidoCozinhaService, PedidoCozinhaService>();
 builder.Services.AddScoped<IPedidoCozinhaItemService, PedidoCozinhaItemService>();
+
+builder.Services.AddScoped<ICardapioItemRepository, CardapioItemRepository>();
+builder.Services.AddScoped<IComandaItemRepository, ComandaItemRepository>();
+builder.Services.AddScoped<IComandaRepository, ComandaRepository>();
+builder.Services.AddScoped<IMesaRepository, MesaRepository>();
+builder.Services.AddScoped<IPedidoCozinhaItemRepository, PedidoCozinhaItemRepository>();
+builder.Services.AddScoped<IPedidoCozinhaRepository, PedidoCozinhaRepository>();
+builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 
 
 

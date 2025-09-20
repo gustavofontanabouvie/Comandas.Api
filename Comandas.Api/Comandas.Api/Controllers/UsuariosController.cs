@@ -18,95 +18,95 @@ namespace Comandas.Api.Controllers;
 [ApiController]
 public class UsuariosController : ControllerBase
 {
-    private readonly IComandasDbContext _dbContext;
+    //private readonly IComandasDbContext _dbContext;
 
-    public UsuariosController(IComandasDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
+    //public UsuariosController(IComandasDbContext dbContext)
+    //{
+    //    _dbContext = dbContext;
+    //}
 
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<UsuarioResponseDto>>> GetUsuarios()
-    {
-        List<Usuario> usuarios = await _dbContext.Usuarios.ToListAsync();
+    //[HttpGet]
+    //public async Task<ActionResult<IEnumerable<UsuarioResponseDto>>> GetUsuarios()
+    //{
+    //    List<Usuario> usuarios = await _dbContext.Usuarios.ToListAsync();
 
-        List<UsuarioResponseDto> usuarioResposta = new();
+    //    List<UsuarioResponseDto> usuarioResposta = new();
 
-        foreach (var user in usuarios)
-        {
-            var novoUsuario = new UsuarioResponseDto(user.Nome, user.Email);
+    //    foreach (var user in usuarios)
+    //    {
+    //        var novoUsuario = new UsuarioResponseDto(user.Nome, user.Email);
 
-            usuarioResposta.Add(novoUsuario);
-        }
-        return usuarioResposta;
-    }
+    //        usuarioResposta.Add(novoUsuario);
+    //    }
+    //    return usuarioResposta;
+    //}
 
-    [Authorize]
-    [HttpGet("{id}")]
-    public async Task<ActionResult<UsuarioResponseDto>> GetUsuario(int id)
-    {
-        var usuario = await _dbContext.Usuarios.FindAsync(id);
+    //[Authorize]
+    //[HttpGet("{id}")]
+    //public async Task<ActionResult<UsuarioResponseDto>> GetUsuario(int id)
+    //{
+    //    var usuario = await _dbContext.Usuarios.FindAsync(id);
 
-        if (usuario == null)
-            return NotFound();
+    //    if (usuario == null)
+    //        return NotFound();
 
-        var usuarioDto = new UsuarioResponseDto(usuario.Nome, usuario.Email);
+    //    var usuarioDto = new UsuarioResponseDto(usuario.Nome, usuario.Email);
 
-        return usuarioDto;
-    }
+    //    return usuarioDto;
+    //}
 
-    [HttpPost]
-    public async Task<ActionResult<UsuarioResponseDto>> PostUsuario(UsuarioCreateDto usuarioCreateDto, CancellationToken cancellationToken)
-    {
-        var usuario = new Usuario
-        {
-            Nome = usuarioCreateDto.nome,
-            Email = usuarioCreateDto.email,
-            Senha = usuarioCreateDto.senha
-        };
+    //[HttpPost]
+    //public async Task<ActionResult<UsuarioResponseDto>> PostUsuario(UsuarioCreateDto usuarioCreateDto, CancellationToken cancellationToken)
+    //{
+    //    var usuario = new Usuario
+    //    {
+    //        Nome = usuarioCreateDto.nome,
+    //        Email = usuarioCreateDto.email,
+    //        Senha = usuarioCreateDto.senha
+    //    };
 
-        _dbContext.Usuarios.Add(usuario);
+    //    _dbContext.Usuarios.Add(usuario);
 
-        await _dbContext.SaveChangesAsync(cancellationToken);
+    //    await _dbContext.SaveChangesAsync(cancellationToken);
 
-        var responseDto = new UsuarioResponseDto(usuario.Nome, usuario.Email);
+    //    var responseDto = new UsuarioResponseDto(usuario.Nome, usuario.Email);
 
-        return CreatedAtAction("GetUsuario", new { id = usuario.Id }, responseDto);
-    }
+    //    return CreatedAtAction("GetUsuario", new { id = usuario.Id }, responseDto);
+    //}
 
-    [HttpPost("login")]
-    public async Task<ActionResult<UsuarioLoginResponseDto>> LoginUser([FromBody] UsuarioLoginRequest loginRequest)
-    {
-        var usuario = await _dbContext.Usuarios.FirstOrDefaultAsync(us => us.Email == loginRequest.email);
+    //[HttpPost("login")]
+    //public async Task<ActionResult<UsuarioLoginResponseDto>> LoginUser([FromBody] UsuarioLoginRequest loginRequest)
+    //{
+    //    var usuario = await _dbContext.Usuarios.FirstOrDefaultAsync(us => us.Email == loginRequest.email);
 
-        if (usuario == null)
-            return NotFound("Email Inválido");
+    //    if (usuario == null)
+    //        return NotFound("Email Inválido");
 
-        if (!loginRequest.senha.Equals(usuario.Senha))
-        {
-            return NotFound("Senha Inválida");
-        }
+    //    if (!loginRequest.senha.Equals(usuario.Senha))
+    //    {
+    //        return NotFound("Senha Inválida");
+    //    }
 
-        var secret = Encoding.UTF8.GetBytes("3e8acfc238f45a314fd4b2bde272678ad30bd1774743a11dbc5c53ac71ca494b");
+    //    var secret = Encoding.UTF8.GetBytes("3e8acfc238f45a314fd4b2bde272678ad30bd1774743a11dbc5c53ac71ca494b");
 
-        var tokenDescriptor = new SecurityTokenDescriptor
-        {
-            Expires = DateTime.UtcNow.AddMinutes(1),
-            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(secret), SecurityAlgorithms.HmacSha256Signature),
-            Subject = new ClaimsIdentity(
-                new Claim[]
-                {
-                    //new Claim(ClaimTypes.Name,usuario.Email),
-                    //new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString())
-                }
-                )
-        };
+    //    var tokenDescriptor = new SecurityTokenDescriptor
+    //    {
+    //        Expires = DateTime.UtcNow.AddMinutes(1),
+    //        SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(secret), SecurityAlgorithms.HmacSha256Signature),
+    //        Subject = new ClaimsIdentity(
+    //            new Claim[]
+    //            {
+    //                //new Claim(ClaimTypes.Name,usuario.Email),
+    //                //new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString())
+    //            }
+    //            )
+    //    };
 
-        var tokenGenerator = new JwtSecurityTokenHandler();
-        var token = tokenGenerator.CreateToken(tokenDescriptor);
+    //    var tokenGenerator = new JwtSecurityTokenHandler();
+    //    var token = tokenGenerator.CreateToken(tokenDescriptor);
 
-        var tokenFinal = tokenGenerator.WriteToken(token);
+    //    var tokenFinal = tokenGenerator.WriteToken(token);
 
-        return Ok(new UsuarioLoginResponseDto(usuario.Email, tokenFinal));
-    }
+    //    return Ok(new UsuarioLoginResponseDto(usuario.Email, tokenFinal));
+    //}
 }

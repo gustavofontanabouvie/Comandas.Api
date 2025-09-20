@@ -15,191 +15,191 @@ namespace Comandas.Api.Controllers;
 public class ComandasController : ControllerBase
 {
 
-    private readonly IComandasDbContext _dbContext;
-    public ComandasController(IComandasDbContext context)
-    {
-        _dbContext = context;
-    }
+    //private readonly IComandasDbContext _dbContext;
+    //public ComandasController(IComandasDbContext context)
+    //{
+    //    _dbContext = context;
+    //}
 
 
-    [SwaggerOperation(summary: "Retorno de uma lista com todas as Comandas cadastradas")]
-    [SwaggerResponse(200, "Retorna a lista das Comandas")]
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<Comanda>>> GetComandas()
-    {
-        return await _dbContext.Comandas.ToListAsync();
-    }
+    //[SwaggerOperation(summary: "Retorno de uma lista com todas as Comandas cadastradas")]
+    //[SwaggerResponse(200, "Retorna a lista das Comandas")]
+    //[HttpGet]
+    //public async Task<ActionResult<IEnumerable<Comanda>>> GetComandas()
+    //{
+    //    return await _dbContext.Comandas.ToListAsync();
+    //}
 
-    [SwaggerOperation(summary: "Retorna uma Comanda", description: "Retorno de uma comanda pelo seu ID no banco de dados, retorna também os seus CardápioItens")]
-    [SwaggerResponse(404, "Comanda não encontrada")]
-    [SwaggerResponse(200, "Comanda encontrada com sucesso")]
-    [HttpGet("{id}")]
-    public async Task<ActionResult<ComandaByIdDto>> GetComanda(int id)
-    {
-        var comanda = await _dbContext.Comandas.AsNoTracking()
-            .Where(c => c.Id == id)
-            .Select(c => new ComandaDto(c.NumeroMesa, c.NomeCliente, c.SituacaoComanda))
-            .TagWith(nameof(GetComanda))
-            .FirstOrDefaultAsync()
-            ;
+    //[SwaggerOperation(summary: "Retorna uma Comanda", description: "Retorno de uma comanda pelo seu ID no banco de dados, retorna também os seus CardápioItens")]
+    //[SwaggerResponse(404, "Comanda não encontrada")]
+    //[SwaggerResponse(200, "Comanda encontrada com sucesso")]
+    //[HttpGet("{id}")]
+    //public async Task<ActionResult<ComandaByIdDto>> GetComanda(int id)
+    //{
+    //    var comanda = await _dbContext.Comandas.AsNoTracking()
+    //        .Where(c => c.Id == id)
+    //        .Select(c => new ComandaDto(c.NumeroMesa, c.NomeCliente, c.SituacaoComanda))
+    //        .TagWith(nameof(GetComanda))
+    //        .FirstOrDefaultAsync()
+    //        ;
 
-        if (comanda == null)
-        {
-            return NotFound();
-        }
+    //    if (comanda == null)
+    //    {
+    //        return NotFound();
+    //    }
 
-        var comandaItens = await _dbContext.ComandaItens.AsNoTracking()
-                .Where(ci => ci.ComandaId == id)
-                .Select(ci => new ComandaItemByIdDto(ci.Id, ci.CardapioItemId, ci.CardapioItem.Titulo))
-                .TagWith(nameof(GetComanda) + "Itens")
-                .ToListAsync()
-                ;
+    //    var comandaItens = await _dbContext.ComandaItens.AsNoTracking()
+    //            .Where(ci => ci.ComandaId == id)
+    //            .Select(ci => new ComandaItemByIdDto(ci.Id, ci.CardapioItemId, ci.CardapioItem.Titulo))
+    //            .TagWith(nameof(GetComanda) + "Itens")
+    //            .ToListAsync()
+    //            ;
 
-        var respostaDto = new ComandaByIdDto(comanda.numeroMesa, comanda.nomeCliente, comanda.situacaoComanda, comandaItens);
-        return Ok(respostaDto);
-    }
-
-
-    [SwaggerOperation(summary: "Adiciona uma comanda ao banco de dados")]
-    [SwaggerResponse(201, "Comanda cadastrada com sucesso")]
-    [SwaggerResponse(422, "Mesa selecionada já está ocupada")]
-    [HttpPost]
-    public async Task<ActionResult<ComandaCreateResponseDto>> PostComanda(ComandaCreateDto comandaDto, CancellationToken cancellationToken)
-    {
-        var verificaMesa = await _dbContext.Mesas.AnyAsync(me => me.Numero == comandaDto.NumeroMesa && me.SituacaoMesa);
-
-        if (verificaMesa)
-            return UnprocessableEntity("A mesa selecionada já está ocupada");
-
-        var comanda = new Comanda
-        {
-            NumeroMesa = comandaDto.NumeroMesa,
-            NomeCliente = comandaDto.NomeCliente,
-            SituacaoComanda = true
-        };
-
-        await _dbContext.Comandas.AddAsync(comanda);
-
-        foreach (int item in comandaDto.CardapioItens)
-        {
-            var comandaItem = new ComandaItem
-            {
-                CardapioItemId = item,
-                Comanda = comanda
-            };
-
-            await _dbContext.ComandaItens.AddAsync(comandaItem);
-
-            var cardapioItem = await _dbContext.CardapioItens.FindAsync(item);
-
-            if (cardapioItem != null && cardapioItem.PossuiPreparo)
-            {
-                PedidoCozinha pedidoCozinha = new()
-                {
-                    Comanda = comanda,
-                    Situacao = 1,
-                    PedidoCozinhaItens = new List<PedidoCozinhaItem>()
-                    {
-                       new PedidoCozinhaItem()
-                       {
-                           ComandaItem = comandaItem
-                       }
-                    }
-                };
-
-                await _dbContext.PedidosCozinha.AddAsync(pedidoCozinha);
-            }
-        }
+    //    var respostaDto = new ComandaByIdDto(comanda.numeroMesa, comanda.nomeCliente, comanda.situacaoComanda, comandaItens);
+    //    return Ok(respostaDto);
+    //}
 
 
-        await _dbContext.SaveChangesAsync(cancellationToken);
+    //[SwaggerOperation(summary: "Adiciona uma comanda ao banco de dados")]
+    //[SwaggerResponse(201, "Comanda cadastrada com sucesso")]
+    //[SwaggerResponse(422, "Mesa selecionada já está ocupada")]
+    //[HttpPost]
+    //public async Task<ActionResult<ComandaCreateResponseDto>> PostComanda(ComandaCreateDto comandaDto, CancellationToken cancellationToken)
+    //{
+    //    var verificaMesa = await _dbContext.Mesas.AnyAsync(me => me.Numero == comandaDto.NumeroMesa && me.SituacaoMesa);
 
-        var comandaResponse = new ComandaCreateResponseDto(comanda.Id, comanda.NumeroMesa, comanda.NomeCliente);
+    //    if (verificaMesa)
+    //        return UnprocessableEntity("A mesa selecionada já está ocupada");
 
-        return CreatedAtAction("GetComanda", new { id = comanda.Id }, comandaResponse);
-    }
+    //    var comanda = new Comanda
+    //    {
+    //        NumeroMesa = comandaDto.NumeroMesa,
+    //        NomeCliente = comandaDto.NomeCliente,
+    //        SituacaoComanda = true
+    //    };
 
+    //    await _dbContext.Comandas.AddAsync(comanda);
 
-    [SwaggerOperation(summary: "Edita uma Comanda", description: "Verifica se os dados a editar são iguais e edita uma Comanda no banco de dados")]
-    [SwaggerResponse(201, "Comanda editada com sucesso")]
-    [SwaggerResponse(404, "Comanda não encontrada")]
-    [HttpPut("{id}")]
-    public async Task<ActionResult<ComandaUpdateResponseDto>> PutComanda(int id, ComandaUpdateDto updateDto, CancellationToken cancellationToken)
-    {
-        var comanda = await _dbContext.Comandas.AsNoTracking()
-            .Where(c => c.Id == id)
-            .FirstOrDefaultAsync();
+    //    foreach (int item in comandaDto.CardapioItens)
+    //    {
+    //        var comandaItem = new ComandaItem
+    //        {
+    //            CardapioItemId = item,
+    //            Comanda = comanda
+    //        };
 
-        if (comanda == null)
-            return NotFound();
+    //        await _dbContext.ComandaItens.AddAsync(comandaItem);
 
-        if (!updateDto.nomeCliente.Equals(comanda.NomeCliente))
-            comanda.NomeCliente = updateDto.nomeCliente;
+    //        var cardapioItem = await _dbContext.CardapioItens.FindAsync(item);
 
-        if (updateDto.numeroMesa != comanda.NumeroMesa)
-            comanda.NumeroMesa = updateDto.numeroMesa;
+    //        if (cardapioItem != null && cardapioItem.PossuiPreparo)
+    //        {
+    //            PedidoCozinha pedidoCozinha = new()
+    //            {
+    //                Comanda = comanda,
+    //                Situacao = 1,
+    //                PedidoCozinhaItens = new List<PedidoCozinhaItem>()
+    //                {
+    //                   new PedidoCozinhaItem()
+    //                   {
+    //                       ComandaItem = comandaItem
+    //                   }
+    //                }
+    //            };
 
-
-        _dbContext.Comandas.Update(comanda);
-
-        foreach (int item in updateDto.cardapioItens)
-        {
-            var comandaItem = new ComandaItem
-            {
-                CardapioItemId = item,
-                Comanda = comanda
-            };
-
-            await _dbContext.ComandaItens.AddAsync(comandaItem);
-
-            var cardapioItem = await _dbContext.CardapioItens
-                .Where(ci => ci.Id == item)
-                .FirstOrDefaultAsync();
-
-            if (cardapioItem != null && cardapioItem.PossuiPreparo)
-            {
-                PedidoCozinha pedidoCozinha = new()
-                {
-                    Comanda = comanda,
-                    Situacao = 1,
-                    PedidoCozinhaItens = new List<PedidoCozinhaItem>()
-                    {
-                       new PedidoCozinhaItem()
-                       {
-                           ComandaItem = comandaItem
-                       }
-                    }
-                };
-
-                await _dbContext.PedidosCozinha.AddAsync(pedidoCozinha);
-            }
-        }
-
-        await _dbContext.SaveChangesAsync(cancellationToken);
-
-        var updateResponse = new ComandaUpdateResponseDto(comanda.Id, comanda.NumeroMesa, comanda.NomeCliente);
-
-        return Ok(updateResponse);
-    }
+    //            await _dbContext.PedidosCozinha.AddAsync(pedidoCozinha);
+    //        }
+    //    }
 
 
-    [SwaggerOperation(summary: "Deleta uma comanda", description: "Deleta uma comanda baseada no ID")]
-    [SwaggerResponse(204, "Comanda deletada com sucesso")]
-    [SwaggerResponse(404, "Comanda não encontrada")]
-    [HttpDelete("{id}")]
-    public async Task<ActionResult> DeleteComanda(int id, CancellationToken cancellationToken)
-    {
-        var comanda = await _dbContext.Comandas.AsNoTracking()
-            .Where(c => c.Id == id)
-            .FirstOrDefaultAsync();
+    //    await _dbContext.SaveChangesAsync(cancellationToken);
 
-        if (comanda == null)
-            return NotFound();
+    //    var comandaResponse = new ComandaCreateResponseDto(comanda.Id, comanda.NumeroMesa, comanda.NomeCliente);
 
-        _dbContext.Comandas.Remove(comanda);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+    //    return CreatedAtAction("GetComanda", new { id = comanda.Id }, comandaResponse);
+    //}
 
-        return NoContent();
-    }
+
+    //[SwaggerOperation(summary: "Edita uma Comanda", description: "Verifica se os dados a editar são iguais e edita uma Comanda no banco de dados")]
+    //[SwaggerResponse(201, "Comanda editada com sucesso")]
+    //[SwaggerResponse(404, "Comanda não encontrada")]
+    //[HttpPut("{id}")]
+    //public async Task<ActionResult<ComandaUpdateResponseDto>> PutComanda(int id, ComandaUpdateDto updateDto, CancellationToken cancellationToken)
+    //{
+    //    var comanda = await _dbContext.Comandas.AsNoTracking()
+    //        .Where(c => c.Id == id)
+    //        .FirstOrDefaultAsync();
+
+    //    if (comanda == null)
+    //        return NotFound();
+
+    //    if (!updateDto.nomeCliente.Equals(comanda.NomeCliente))
+    //        comanda.NomeCliente = updateDto.nomeCliente;
+
+    //    if (updateDto.numeroMesa != comanda.NumeroMesa)
+    //        comanda.NumeroMesa = updateDto.numeroMesa;
+
+
+    //    _dbContext.Comandas.Update(comanda);
+
+    //    foreach (int item in updateDto.cardapioItens)
+    //    {
+    //        var comandaItem = new ComandaItem
+    //        {
+    //            CardapioItemId = item,
+    //            Comanda = comanda
+    //        };
+
+    //        await _dbContext.ComandaItens.AddAsync(comandaItem);
+
+    //        var cardapioItem = await _dbContext.CardapioItens
+    //            .Where(ci => ci.Id == item)
+    //            .FirstOrDefaultAsync();
+
+    //        if (cardapioItem != null && cardapioItem.PossuiPreparo)
+    //        {
+    //            PedidoCozinha pedidoCozinha = new()
+    //            {
+    //                Comanda = comanda,
+    //                Situacao = 1,
+    //                PedidoCozinhaItens = new List<PedidoCozinhaItem>()
+    //                {
+    //                   new PedidoCozinhaItem()
+    //                   {
+    //                       ComandaItem = comandaItem
+    //                   }
+    //                }
+    //            };
+
+    //            await _dbContext.PedidosCozinha.AddAsync(pedidoCozinha);
+    //        }
+    //    }
+
+    //    await _dbContext.SaveChangesAsync(cancellationToken);
+
+    //    var updateResponse = new ComandaUpdateResponseDto(comanda.Id, comanda.NumeroMesa, comanda.NomeCliente);
+
+    //    return Ok(updateResponse);
+    //}
+
+
+    //[SwaggerOperation(summary: "Deleta uma comanda", description: "Deleta uma comanda baseada no ID")]
+    //[SwaggerResponse(204, "Comanda deletada com sucesso")]
+    //[SwaggerResponse(404, "Comanda não encontrada")]
+    //[HttpDelete("{id}")]
+    //public async Task<ActionResult> DeleteComanda(int id, CancellationToken cancellationToken)
+    //{
+    //    var comanda = await _dbContext.Comandas.AsNoTracking()
+    //        .Where(c => c.Id == id)
+    //        .FirstOrDefaultAsync();
+
+    //    if (comanda == null)
+    //        return NotFound();
+
+    //    _dbContext.Comandas.Remove(comanda);
+    //    await _dbContext.SaveChangesAsync(cancellationToken);
+
+    //    return NoContent();
+    //}
 
 }

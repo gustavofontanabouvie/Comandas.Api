@@ -13,113 +13,113 @@ namespace Comandas.Api.Controllers;
 [ApiController]
 public class PedidosCozinhaController : ControllerBase
 {
-    private readonly IComandasDbContext _dbContext;
+    //private readonly IComandasDbContext _dbContext;
 
-    public PedidosCozinhaController(IComandasDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
+    //public PedidosCozinhaController(IComandasDbContext dbContext)
+    //{
+    //    _dbContext = dbContext;
+    //}
 
-    [SwaggerOperation(summary: "Retorna uma lista de todos os pedidoCozinha")]
-    [SwaggerResponse(200, "Retorno da lista")]
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<PedidoResponseDto>>> GetPedidosCozinha(int situacao)
-    {
-        //pedido.ID,comanda.NomeCliente,comanda.NumeroMesa,cardapioItem.Titulo
+    //[SwaggerOperation(summary: "Retorna uma lista de todos os pedidoCozinha")]
+    //[SwaggerResponse(200, "Retorno da lista")]
+    //[HttpGet]
+    //public async Task<ActionResult<IEnumerable<PedidoResponseDto>>> GetPedidosCozinha(int situacao)
+    //{
+    //    //pedido.ID,comanda.NomeCliente,comanda.NumeroMesa,cardapioItem.Titulo
 
-        var pedidos = await _dbContext.PedidosCozinha
-            .Where(pe => pe.Situacao == situacao)
-            .Include(pe => pe.Comanda)
-            .Include(pe => pe.PedidoCozinhaItens)
-                .ThenInclude(pci => pci.ComandaItem)
-                    .ThenInclude(ci => ci.CardapioItem)
-            .Select(pe => new PedidoResponseDto(pe.Id, pe.Comanda.NumeroMesa, pe.Comanda.NomeCliente, pe.PedidoCozinhaItens.First().ComandaItem.CardapioItem.Titulo))
-            .ToListAsync();
+    //    var pedidos = await _dbContext.PedidosCozinha
+    //        .Where(pe => pe.Situacao == situacao)
+    //        .Include(pe => pe.Comanda)
+    //        .Include(pe => pe.PedidoCozinhaItens)
+    //            .ThenInclude(pci => pci.ComandaItem)
+    //                .ThenInclude(ci => ci.CardapioItem)
+    //        .Select(pe => new PedidoResponseDto(pe.Id, pe.Comanda.NumeroMesa, pe.Comanda.NomeCliente, pe.PedidoCozinhaItens.First().ComandaItem.CardapioItem.Titulo))
+    //        .ToListAsync();
 
-        return pedidos;
-    }
+    //    return pedidos;
+    //}
 
-    [SwaggerOperation(summary: "Retorna um PedidoCozinha", description: "Retorna um PedidoCozinha baseado no ID")]
-    [SwaggerResponse(200, "PedidoCozinha encontrado com sucesso")]
-    [SwaggerResponse(404, "PedidoCozinha não encontrado")]
-    [HttpGet("{id}")]
-    public async Task<ActionResult<PedidoRespondeDto>> GetPedidoCozinha(int id)
-    {
-        var pedidoCozinha = await _dbContext.PedidosCozinha.AsNoTracking()
-            .Where(pc => pc.Id == id)
-            .FirstOrDefaultAsync();
+    //[SwaggerOperation(summary: "Retorna um PedidoCozinha", description: "Retorna um PedidoCozinha baseado no ID")]
+    //[SwaggerResponse(200, "PedidoCozinha encontrado com sucesso")]
+    //[SwaggerResponse(404, "PedidoCozinha não encontrado")]
+    //[HttpGet("{id}")]
+    //public async Task<ActionResult<PedidoRespondeDto>> GetPedidoCozinha(int id)
+    //{
+    //    var pedidoCozinha = await _dbContext.PedidosCozinha.AsNoTracking()
+    //        .Where(pc => pc.Id == id)
+    //        .FirstOrDefaultAsync();
 
-        if (pedidoCozinha == null)
-            return NotFound();
+    //    if (pedidoCozinha == null)
+    //        return NotFound();
 
-        var pedidoResponse = new PedidoRespondeDto(pedidoCozinha.ComandaId, pedidoCozinha.Situacao);
-        return Ok(pedidoResponse);
-    }
+    //    var pedidoResponse = new PedidoRespondeDto(pedidoCozinha.ComandaId, pedidoCozinha.Situacao);
+    //    return Ok(pedidoResponse);
+    //}
 
-    [SwaggerOperation(summary: "Avança a situação de um pedidoCozinha", description: "Edita um PedidoCozinha avançando a sua situação")]
-    [SwaggerResponse(200, "PedidoCozinha editado com sucesso")]
-    [SwaggerResponse(404, "PedidoCozinha não encontrado")]
-    [HttpPatch("AvancarPedido/")]
-    public async Task<ActionResult> AvançarPedido(int pedidoCozinhaId, CancellationToken cancellationToken)
-    {
-        var pedidoCozinha = await _dbContext.PedidosCozinha.AsNoTracking()
-             .Where(pc => pc.Id == pedidoCozinhaId)
-             .FirstOrDefaultAsync();
+    //[SwaggerOperation(summary: "Avança a situação de um pedidoCozinha", description: "Edita um PedidoCozinha avançando a sua situação")]
+    //[SwaggerResponse(200, "PedidoCozinha editado com sucesso")]
+    //[SwaggerResponse(404, "PedidoCozinha não encontrado")]
+    //[HttpPatch("AvancarPedido/")]
+    //public async Task<ActionResult> AvançarPedido(int pedidoCozinhaId, CancellationToken cancellationToken)
+    //{
+    //    var pedidoCozinha = await _dbContext.PedidosCozinha.AsNoTracking()
+    //         .Where(pc => pc.Id == pedidoCozinhaId)
+    //         .FirstOrDefaultAsync();
 
-        if (pedidoCozinha == null)
-            return NotFound();
+    //    if (pedidoCozinha == null)
+    //        return NotFound();
 
-        if (pedidoCozinha.Situacao == 1)
-        {
-            pedidoCozinha.Situacao = 2;
-        }
-        else if (pedidoCozinha.Situacao == 2)
-        {
-            pedidoCozinha.Situacao = 3;
-        }
-        else
-        {
-            pedidoCozinha.Situacao = 4;
-        }
+    //    if (pedidoCozinha.Situacao == 1)
+    //    {
+    //        pedidoCozinha.Situacao = 2;
+    //    }
+    //    else if (pedidoCozinha.Situacao == 2)
+    //    {
+    //        pedidoCozinha.Situacao = 3;
+    //    }
+    //    else
+    //    {
+    //        pedidoCozinha.Situacao = 4;
+    //    }
 
-        _dbContext.PedidosCozinha.Update(pedidoCozinha);
+    //    _dbContext.PedidosCozinha.Update(pedidoCozinha);
 
-        await _dbContext.SaveChangesAsync(cancellationToken);
+    //    await _dbContext.SaveChangesAsync(cancellationToken);
 
-        return Ok(pedidoCozinha);
-    }
+    //    return Ok(pedidoCozinha);
+    //}
 
-    [SwaggerOperation(summary: "Volta a situação de um pedidoCozinha", description: "Edita um PedidoCozinha retornando a sua situação")]
-    [SwaggerResponse(200, "PedidoCozinha editado com sucesso")]
-    [SwaggerResponse(404, "PedidoCozinha não encontrado")]
-    [HttpPatch("RetornarPedido/")]
-    public async Task<ActionResult> RetornarPedido(int pedidoCozinhaId, CancellationToken cancellationToken)
-    {
-        var pedidoCozinha = await _dbContext.PedidosCozinha.AsNoTracking()
-             .Where(pc => pc.Id == pedidoCozinhaId)
-             .FirstOrDefaultAsync();
+    //[SwaggerOperation(summary: "Volta a situação de um pedidoCozinha", description: "Edita um PedidoCozinha retornando a sua situação")]
+    //[SwaggerResponse(200, "PedidoCozinha editado com sucesso")]
+    //[SwaggerResponse(404, "PedidoCozinha não encontrado")]
+    //[HttpPatch("RetornarPedido/")]
+    //public async Task<ActionResult> RetornarPedido(int pedidoCozinhaId, CancellationToken cancellationToken)
+    //{
+    //    var pedidoCozinha = await _dbContext.PedidosCozinha.AsNoTracking()
+    //         .Where(pc => pc.Id == pedidoCozinhaId)
+    //         .FirstOrDefaultAsync();
 
-        if (pedidoCozinha == null)
-            return NotFound();
+    //    if (pedidoCozinha == null)
+    //        return NotFound();
 
-        if (pedidoCozinha.Situacao == 2)
-        {
-            pedidoCozinha.Situacao = 1;
-        }
-        else if (pedidoCozinha.Situacao == 3)
-        {
-            pedidoCozinha.Situacao = 2;
-        }
-        else
-        {
-            return Ok(pedidoCozinha);
-        }
+    //    if (pedidoCozinha.Situacao == 2)
+    //    {
+    //        pedidoCozinha.Situacao = 1;
+    //    }
+    //    else if (pedidoCozinha.Situacao == 3)
+    //    {
+    //        pedidoCozinha.Situacao = 2;
+    //    }
+    //    else
+    //    {
+    //        return Ok(pedidoCozinha);
+    //    }
 
-        _dbContext.PedidosCozinha.Update(pedidoCozinha);
+    //    _dbContext.PedidosCozinha.Update(pedidoCozinha);
 
-        await _dbContext.SaveChangesAsync(cancellationToken);
+    //    await _dbContext.SaveChangesAsync(cancellationToken);
 
-        return Ok(pedidoCozinha);
-    }
+    //    return Ok(pedidoCozinha);
+    //}
 
 }
