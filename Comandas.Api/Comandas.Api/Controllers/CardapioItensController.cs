@@ -15,32 +15,23 @@ namespace Comandas.Api.Controllers
     public class CardapioItensController : ControllerBase
     {
         private readonly ICardapioItemService _cardapioItemService;
+        private readonly ILogger<CardapioItensController> _logger;
 
-        public CardapioItensController(ICardapioItemService cardapioItemService)
+        public CardapioItensController(ICardapioItemService cardapioItemService, ILogger<CardapioItensController> logger)
         {
             _cardapioItemService = cardapioItemService;
+            _logger = logger;
         }
 
 
         [SwaggerOperation(summary: "Criação de um novo CardapioItem")]
         [SwaggerResponse(201, "Caso o item seja criado com sucesso")]
         [HttpPost]
-        public async Task<ActionResult<CardapioItemCreateResponseDto>> PostCardapioItem(CardapioItemCreateDto cardapioItemCreateDto, CancellationToken cancellationToken)
+        public async Task<ActionResult<CardapioItemCreateResponseDto>> PostCardapioItem([FromBody] CardapioItemCreateDto cardapioItemCreateDto, CancellationToken cancellationToken)
         {
-            var cardapioItem = new CardapioItem
-            {
-                Descricao = cardapioItemCreateDto.descricao,
-                Titulo = cardapioItemCreateDto.titulo,
-                Preco = cardapioItemCreateDto.preco,
-                PossuiPreparo = cardapioItemCreateDto.possuiPreparo
-            };
+            var retorno = await _cardapioItemService.PostCardapioItem(cardapioItemCreateDto, cancellationToken);
 
-            //_dbContext.CardapioItens.Add(cardapioItem);
-            //await _dbContext.SaveChangesAsync(cancellationToken);
-
-            var responseDto = new CardapioItemCreateResponseDto(cardapioItem.Id, cardapioItem.Titulo, cardapioItem.Descricao, cardapioItem.PossuiPreparo);
-
-            return CreatedAtAction("GetCardapioItem", new { id = cardapioItem.Id }, responseDto);
+            return CreatedAtAction("GetCardapioItem", new { id = retorno.id }, retorno);
         }
 
 
@@ -53,23 +44,19 @@ namespace Comandas.Api.Controllers
         //}
 
 
-        //[SwaggerOperation(summary: "Retorna um cardapioItem", description: "Retorna um cardápioItem baseado em um ID")]
-        //[SwaggerResponse(404, "CardapioItem não encontrado")]
-        //[SwaggerResponse(200, "CardapioItem encontrado com sucesso")]
-        //[HttpGet("{id}")]
-        //public async Task<ActionResult<CardapioItemByIdDto>> GetCardapioItem(int id)
-        //{
-        //    //var cardapioItem = await _dbContext.CardapioItens.AsNoTracking()
-        //    //    .Where(ci => ci.Id == id)
-        //    //    .Select(ci => new CardapioItemByIdDto(ci.Titulo, ci.Descricao, ci.Preco))
-        //    //    .TagWith(nameof(GetCardapioItem))
-        //    //    .FirstOrDefaultAsync();
+        [SwaggerOperation(summary: "Retorna um cardapioItem", description: "Retorna um cardápioItem baseado em um ID")]
+        [SwaggerResponse(404, "CardapioItem não encontrado")]
+        [SwaggerResponse(200, "CardapioItem encontrado com sucesso")]
+        [HttpGet("{id}")]
+        public async Task<ActionResult<CardapioItemByIdDto>> GetCardapioItem(int id, CancellationToken cancellationToken)
+        {
+            var cardapioItem = await _cardapioItemService.GetCardapioItem(id, cancellationToken);
 
-        //    //if (cardapioItem == null)
-        //    //    return NotFound();
+            if (cardapioItem == null)
+                return NotFound();
 
-        //    //return Ok(cardapioItem);
-        //}
+            return Ok(cardapioItem);
+        }
 
         //[SwaggerOperation(summary: "Edita um CardapioItem", description: "Verifica se os campos a editar são iguais e edita um CardapioItem pelo ID")]
         //[SwaggerResponse(404, "Item não encontrado")]

@@ -3,15 +3,15 @@ using Comandas.Application.Interfaces;
 using Comandas.Application.Services;
 using Comandas.Data.Repositories.Implementation;
 using Comandas.Data.Repositories.Interface;
-using Comandas.Domain;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Net;
 using System.Reflection;
 using System.Text;
+
 
 
 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls13;
@@ -65,7 +65,6 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-
 
 builder.Services.AddSwaggerGen(
     c =>

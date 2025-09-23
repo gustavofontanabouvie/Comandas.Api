@@ -15,6 +15,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\Comandas.Domain\Comandas.Domain\Comandas.Domain.csproj" />
+		<ProjectReference Include="..\..\Comandas.Shared\Comandas.Shared\Comandas.Shared.csproj" />
 	</ItemGroup>
 
 </Project>
