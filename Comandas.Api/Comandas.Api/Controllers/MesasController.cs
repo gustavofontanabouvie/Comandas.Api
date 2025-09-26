@@ -2,6 +2,7 @@
 using Comandas.Api.DTOs.Mesa;
 using Comandas.Application.Interfaces;
 using Comandas.Domain;
+using Comandas.Shared.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
@@ -14,12 +15,13 @@ namespace Comandas.Api.Controllers;
 [ApiController]
 public class MesasController : ControllerBase
 {
-    //private readonly IComandasDbContext _dbContext;
-
-    //public MesasController(IComandasDbContext dbContext)
-    //{
-    //    _dbContext = dbContext;
-    //}
+    private readonly IMesaService _mesaService;
+    private readonly ILogger<MesasController> _logger;
+    public MesasController(IMesaService mesaService, ILogger<MesasController> logger)
+    {
+        _logger = logger;
+        _mesaService = mesaService;
+    }
 
 
     //[SwaggerOperation(summary: "Retorno de uma lista com todas as Mesas cadastradas")]
@@ -31,48 +33,37 @@ public class MesasController : ControllerBase
     //}
 
 
-    //[SwaggerOperation(summary: "Retorna uma Mesa", description: "Retorna um Mesa baseado em um ID")]
-    //[SwaggerResponse(404, "Mesa não encontrado")]
-    //[SwaggerResponse(200, "Mesa encontrado com sucesso")]
-    //[HttpGet("{id}")]
-    //public async Task<ActionResult<MesaByIdDto>> GetMesa(int id)
-    //{
-    //    var mesa = await _dbContext.Mesas.AsNoTracking()
-    //        .Where(me => me.Id == id)
-    //        .FirstOrDefaultAsync();
+    [SwaggerOperation(summary: "Retorna uma Mesa", description: "Retorna um Mesa baseado em um ID")]
+    [SwaggerResponse(404, "Mesa não encontrado")]
+    [SwaggerResponse(200, "Mesa encontrado com sucesso")]
+    [HttpGet("{id}")]
+    public async Task<ActionResult<MesaByIdDto>> GetMesa(int id)
+    {
+        var mesa = await _mesaService.GetMesaById(id);
 
-    //    if (mesa == null)
-    //    {
-    //        return NotFound();
-    //    }
+        if (mesa == null)
+        {
+            return NotFound();
+        }
 
-    //    var mesaById = new MesaByIdDto(mesa.Numero, mesa.SituacaoMesa);
-
-    //    return mesaById;
-    //}
+        return Ok(mesa);
+    }
 
 
-    //[SwaggerOperation(summary: "Cria uma Mesa")]
-    //[SwaggerResponse(201, "Mesa criada com sucesso")]
-    //[SwaggerResponse(422, "Ja possui uma mesa com essa numeração")]
-    //[HttpPost]
-    //public async Task<ActionResult<MesaCreateDto>> PostMesa(MesaCreateDto mesaDto, CancellationToken cancellationToken)
-    //{
-    //    var verificaMesa = await _dbContext.Mesas.AnyAsync(me => me.Numero == mesaDto.numero);
-    //    if (verificaMesa == true)
-    //        return UnprocessableEntity();
+    [SwaggerOperation(summary: "Cria uma Mesa")]
+    [SwaggerResponse(201, "Mesa criada com sucesso")]
+    [SwaggerResponse(422, "Ja possui uma mesa com essa numeração")]
+    [HttpPost]
+    public async Task<ActionResult<MesaResponseDto>> PostMesa(MesaCreateDto mesaDto, CancellationToken cancellationToken)
+    {
+        var retorno = await _mesaService.PostMesa(mesaDto, cancellationToken);
 
-    //    var mesa = new Mesa
-    //    {
-    //        Numero = mesaDto.numero
-    //    };
+        if (retorno is null)
+        {
+            return UnprocessableEntity();
+        }
 
-    //    _dbContext.Mesas.Add(mesa);
-    //    await _dbContext.SaveChangesAsync(cancellationToken);
-
-    //    var mesaCreateDto = new MesaCreateDto(mesa.Numero);
-
-    //    return CreatedAtAction("GetMesa", new { id = mesa.Id }, mesaCreateDto);
-    //}
+        return CreatedAtAction("GetMesa", new { id = retorno.id }, retorno);
+    }
 
 }
