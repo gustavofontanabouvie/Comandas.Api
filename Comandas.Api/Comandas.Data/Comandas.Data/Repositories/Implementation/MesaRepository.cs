@@ -40,6 +40,11 @@ namespace Comandas.Data.Repositories.Implementation
             return mesaDto;
         }
 
+        public async Task<IEnumerable<Mesa>> GetMesas()
+        {
+            return await _dbContext.Mesas.ToListAsync();
+        }
+
         public async Task<bool> VerificaMesa(int numero)
         {
             var verificamesa = await _dbContext.Mesas.AnyAsync(me => me.Numero == numero);

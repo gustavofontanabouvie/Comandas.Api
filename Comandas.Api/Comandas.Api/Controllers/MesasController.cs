@@ -24,13 +24,15 @@ public class MesasController : ControllerBase
     }
 
 
-    //[SwaggerOperation(summary: "Retorno de uma lista com todas as Mesas cadastradas")]
-    //[SwaggerResponse(200, "Retorna a lista das Mesas")]
-    //[HttpGet]
-    //public async Task<ActionResult<IEnumerable<Mesa>>> GetMesas()
-    //{
-    //    return await _dbContext.Mesas.ToListAsync();
-    //}
+    [SwaggerOperation(summary: "Retorno de uma lista com todas as Mesas cadastradas")]
+    [SwaggerResponse(200, "Retorna a lista das Mesas")]
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<Mesa>>> GetMesas()
+    {
+        var retorno = await _mesaService.GetMesas();
+
+        return Ok(retorno);
+    }
 
 
     [SwaggerOperation(summary: "Retorna uma Mesa", description: "Retorna um Mesa baseado em um ID")]

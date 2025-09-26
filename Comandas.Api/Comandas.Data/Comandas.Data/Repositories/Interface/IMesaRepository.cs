@@ -13,6 +13,7 @@ namespace Comandas.Data.Repositories.Interface
     {
         public Task<Mesa> CreateMesa(Mesa mesa, CancellationToken cancellationToken);
         public Task<MesaByIdDto?> GetMesaById(int id);
+        public Task<IEnumerable<Mesa>> GetMesas();
         public Task<bool> VerificaMesa(int numero);
     }
 }

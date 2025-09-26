@@ -23,6 +23,13 @@ public class MesaService : IMesaService
         return mesa;
     }
 
+    public async Task<IEnumerable<Mesa>> GetMesas()
+    {
+        var mesas = await _mesaRepository.GetMesas();
+
+        return mesas;
+    }
+
     public async Task<MesaResponseDto> PostMesa(MesaCreateDto mesaDto, CancellationToken cancellationToken)
     {
         var mesa = new Mesa
