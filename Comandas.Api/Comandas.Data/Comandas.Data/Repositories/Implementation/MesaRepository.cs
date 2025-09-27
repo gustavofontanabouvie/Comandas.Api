@@ -33,11 +33,10 @@ namespace Comandas.Data.Repositories.Implementation
         {
             var mesa = await _dbContext.Mesas.AsNoTracking()
                 .Where(me => me.Id == id)
+                .Select(me => new MesaByIdDto(me.Numero, me.SituacaoMesa))
                 .FirstOrDefaultAsync();
 
-            var mesaDto = new MesaByIdDto(mesa.Numero, mesa.SituacaoMesa);
-
-            return mesaDto;
+            return mesa;
         }
 
         public async Task<IEnumerable<Mesa>> GetMesas()

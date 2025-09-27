@@ -5,6 +5,7 @@ using Comandas.Domain;
 using Comandas.Shared.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Threading;
 
@@ -26,10 +27,14 @@ public class MesasController : ControllerBase
 
     [SwaggerOperation(summary: "Retorno de uma lista com todas as Mesas cadastradas")]
     [SwaggerResponse(200, "Retorna a lista das Mesas")]
+    [SwaggerResponse(204, "Não existem itens cadastrados")]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Mesa>>> GetMesas()
     {
         var retorno = await _mesaService.GetMesas();
+
+        if (retorno.IsNullOrEmpty())
+            return NoContent();
 
         return Ok(retorno);
     }
