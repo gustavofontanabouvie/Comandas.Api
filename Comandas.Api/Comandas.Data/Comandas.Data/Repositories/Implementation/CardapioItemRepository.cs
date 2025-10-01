@@ -45,7 +45,7 @@ namespace Comandas.Data.Repositories.Implementation
 
             var cardapioItem = await _dbContext.CardapioItens.AsNoTracking()
                 .Where(ci => ci.Id == id)
-                .Select(ci => new CardapioItemByIdDto(ci.Titulo, ci.Descricao, ci.Preco))
+                .Select(ci => new CardapioItemByIdDto(ci.Titulo, ci.Descricao, ci.Preco, ci.PossuiPreparo))
                 .TagWith(nameof(GetCardapioItemById))
                 .FirstOrDefaultAsync();
 

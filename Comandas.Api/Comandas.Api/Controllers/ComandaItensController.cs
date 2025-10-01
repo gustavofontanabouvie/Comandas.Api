@@ -11,37 +11,28 @@ namespace Comandas.Api.Controllers
     [ApiController]
     public class ComandaItensController : ControllerBase
     {
-        //private readonly IComandasDbContext _dbContext;
+        private readonly IComandaItemService _comandaItemService;
+        private readonly ILogger _logger;
 
-        //public ComandaItensController(IComandasDbContext dbContext)
-        //{
-        //    _dbContext = dbContext;
-        //}
+        public ComandaItensController(ILogger<ComandaItensController> logger, IComandaItemService comandaItemService)
+        {
+            _logger = logger;
+            _comandaItemService = comandaItemService;
+        }
 
-        //[SwaggerOperation(summary: "Retorna um ComandaItem", description: "Retorna um ComandaItem baseado em seu ID, também acessa a tabela CardapioItem e retorna o ID")]
-        //[SwaggerResponse(404, "ComandaItem não encotrado")]
-        //[SwaggerResponse(200, "ComandaItem encontrado com sucesso")]
-        //[HttpGet("{id}")]
-        //public async Task<ActionResult<ComandaItemResponseDto>> GetComandaItem(int id)
-        //{
-        //    var comanItem = await (from comandaItem in _dbContext.ComandaItens
-        //                           join comanda in _dbContext.Comandas
-        //                             on comandaItem.ComandaId equals comanda.Id
-        //                           join cardapioItem in _dbContext.CardapioItens
-        //                             on comandaItem.CardapioItemId equals cardapioItem.Id
-        //                           where comandaItem.Id == id
-        //                           select new
-        //                           {
-        //                               ComandaId = comanda.Id,
-        //                               CardapioItemId = cardapioItem.Id
-        //                           }).FirstOrDefaultAsync();
 
-        //    if (comanItem == null)
-        //        return NotFound();
+        [SwaggerOperation(summary: "Retorna um ComandaItem", description: "Retorna o ID da Comanda, também acessa a tabela CardapioItem e retorna o ID")]
+        [SwaggerResponse(404, "ComandaItem não encotrado")]
+        [SwaggerResponse(200, "ComandaItem encontrado com sucesso")]
+        [HttpGet("{id}")]
+        public async Task<ActionResult<ComandaItemResponseDto>> GetComandaItem(int id)
+        {
+            var comandaItem = await _comandaItemService.GetComandaItemById(id);
 
-        //    var responseComandaItem = new ComandaItemResponseDto(comanItem.ComandaId, comanItem.CardapioItemId);
+            if (comandaItem == null)
+                return NotFound();
 
-        //    return Ok(responseComandaItem);
-        //}
+            return Ok(comandaItem);
+        }
     }
 }

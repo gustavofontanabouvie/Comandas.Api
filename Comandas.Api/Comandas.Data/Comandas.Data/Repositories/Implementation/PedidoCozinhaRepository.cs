@@ -1,5 +1,6 @@
 ﻿using Comandas.Api.Database;
 using Comandas.Data.Repositories.Interface;
+using Comandas.Domain;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +16,11 @@ namespace Comandas.Data.Repositories.Implementation
         public PedidoCozinhaRepository(ComandasDbContext dbContext)
         {
             _dbContext = dbContext;
+        }
+
+        public async Task CreatePedidoCozinha(PedidoCozinha pedidoCozinha, CancellationToken cancellationToken)
+        {
+            await _dbContext.PedidosCozinha.AddAsync(pedidoCozinha, cancellationToken);
         }
     }
 }

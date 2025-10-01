@@ -22,6 +22,12 @@ public class MesaService : IMesaService
 
         return mesa;
     }
+    public async Task<MesaByIdDto?> GetMesa(int id)
+    {
+        var mesa = await _mesaRepository.GetMesaById(id);
+
+        return mesa;
+    }
 
     public async Task<IEnumerable<Mesa>> GetMesas()
     {

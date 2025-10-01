@@ -1,3 +1,3 @@
 ﻿namespace Comandas.Api.DTOs.CardapioItem;
 
-public record CardapioItemByIdDto(string titulo, string descricao, double preco);
+public record CardapioItemByIdDto(string titulo, string descricao, double preco, bool possuiPreparo);

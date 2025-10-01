@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Comandas.Data.Repositories.Implementation
@@ -19,6 +20,11 @@ namespace Comandas.Data.Repositories.Implementation
         public MesaRepository(ComandasDbContext dbContext)
         {
             _dbContext = dbContext;
+        }
+
+        public async Task SaveChanges(CancellationToken cancellationToken)
+        {
+            await _dbContext.SaveChangesAsync(cancellationToken);
         }
 
         public async Task<Mesa> CreateMesa(Mesa mesa, CancellationToken cancellationToken)
@@ -34,6 +40,15 @@ namespace Comandas.Data.Repositories.Implementation
             var mesa = await _dbContext.Mesas.AsNoTracking()
                 .Where(me => me.Id == id)
                 .Select(me => new MesaByIdDto(me.Numero, me.SituacaoMesa))
+                .FirstOrDefaultAsync();
+
+            return mesa;
+        }
+
+        public async Task<Mesa?> GetMesa(int numeroMesa, CancellationToken cancellationToken)
+        {
+            var mesa = await _dbContext.Mesas
+                .Where(me => me.Numero == numeroMesa)
                 .FirstOrDefaultAsync();
 
             return mesa;

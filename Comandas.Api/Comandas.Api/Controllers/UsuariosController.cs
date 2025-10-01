@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Swashbuckle.AspNetCore.Annotations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -18,28 +19,28 @@ namespace Comandas.Api.Controllers;
 [ApiController]
 public class UsuariosController : ControllerBase
 {
-    //private readonly IComandasDbContext _dbContext;
+    private readonly IUsuarioService _usuarioService;
+    private readonly ILogger _logger;
 
-    //public UsuariosController(IComandasDbContext dbContext)
-    //{
-    //    _dbContext = dbContext;
-    //}
+    public UsuariosController(ILogger<UsuariosController> logger, IUsuarioService usuarioService)
+    {
+        _logger = logger;
+        _usuarioService = usuarioService;
+    }
 
-    //[HttpGet]
-    //public async Task<ActionResult<IEnumerable<UsuarioResponseDto>>> GetUsuarios()
-    //{
-    //    List<Usuario> usuarios = await _dbContext.Usuarios.ToListAsync();
+    [SwaggerOperation(summary: "Retorno de uma lista com todos os usuarios cadastradas")]
+    [SwaggerResponse(200, "Retorna a lista de usuarios")]
+    [SwaggerResponse(204, "Não existem usuarios cadastrados")]
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<UsuarioResponseDto>>> GetUsuarios()
+    {
+        //var usuarios = await _dbContext.Usuarios.ToListAsync();
+        var usuarios = await _usuarioService.GetUsers();
 
-    //    List<UsuarioResponseDto> usuarioResposta = new();
-
-    //    foreach (var user in usuarios)
-    //    {
-    //        var novoUsuario = new UsuarioResponseDto(user.Nome, user.Email);
-
-    //        usuarioResposta.Add(novoUsuario);
-    //    }
-    //    return usuarioResposta;
-    //}
+        if (usuarios.IsNullOrEmpty())
+            return NoContent();
+        return Ok(usuarios);
+    }
 
     //[Authorize]
     //[HttpGet("{id}")]

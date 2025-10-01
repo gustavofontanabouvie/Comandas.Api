@@ -12,7 +12,10 @@ namespace Comandas.Data.Repositories.Interface
     public interface IMesaRepository
     {
         public Task<Mesa> CreateMesa(Mesa mesa, CancellationToken cancellationToken);
+
+        public Task SaveChanges(CancellationToken cancellationToken);
         public Task<MesaByIdDto?> GetMesaById(int id);
+        public Task<Mesa?> GetMesa(int numeroMesa, CancellationToken cancellationToken);
         public Task<IEnumerable<Mesa>> GetMesas();
         public Task<bool> VerificaMesa(int numero);
     }

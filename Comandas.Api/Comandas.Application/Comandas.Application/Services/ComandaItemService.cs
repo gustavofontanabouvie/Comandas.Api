@@ -1,4 +1,5 @@
 ﻿
+using Comandas.Api.DTOs.ComandaItem;
 using Comandas.Application.Interfaces;
 using Comandas.Data.Repositories.Interface;
 
@@ -11,5 +12,13 @@ public class ComandaItemService : IComandaItemService
     public ComandaItemService(IComandaItemRepository comandaItemRepository)
     {
         _comandaItemRepository = comandaItemRepository;
+    }
+
+    public async Task<ComandaItemResponseDto> GetComandaItemById(int id)
+    {
+        var comandaItem = await _comandaItemRepository.GetComandaItemById(id);
+
+
+        return comandaItem;
     }
 }
